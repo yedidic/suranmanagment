@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ממשק ניהול סוראן</title>
+    <!-- Include Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Include Font Awesome CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Include custom CSS -->
+    <link href="styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5 mb-5">
+      <div
+        class="toast"
+        id="myToast"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+        data-delay="3000"
+      >
+        <div class="toast-header">
+          <strong class="mr-auto">העתקה בוצעה</strong>
+          <small>Just now</small>
+          <button
+            type="button"
+            class="ml-2 mb-1 close"
+            data-dismiss="toast"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">הטקסט הועתק ללוח</div>
+      </div>
+      <a href="/suranmanagment"
+        ><h1 class="text-center mb-5">ממשק ניהול סוראן</h1></a
+      >
+      <h2 class="text-center mb-5" id="pageSubject">נושא העמוד</h2>
+      <form id="postForm" class="mb-5">
+        <div class="form-group">
+          <label for="date">תאריך*</label>
+          <input
+            type="date"
+            class="form-control"
+            id="date"
+            name="date"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="hour">שעה*</label>
+          <input
+            type="time"
+            class="form-control"
+            id="hour"
+            name="hour"
+            value="21:00"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="subject">נושא*</label>
+          <input
+            type="text"
+            class="form-control"
+            id="subject"
+            name="subject"
+            placeholder="לדוג': החזית האנרגטית"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label for="extensiveSubject">נושא מורחב (אופציונלי)</label>
+          <textarea
+            class="form-control"
+            id="extensiveSubject"
+            name="extensiveSubject"
+            rows="3"
+            placeholder="לדוג': השימוש בחזית האנרגטית בתקופה של קושי כללי"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="cardcomLink">קישור לדף נחיתה בקארדקום*</label>
+          <input
+            type="url"
+            class="form-control"
+            id="cardcomLink"
+            name="cardcomLink"
+            value="https://secure.cardcom.solutions/EA/EA5/xhfS"
+            required
+          />
+        </div>
+        <div class="preview-box p-3 border my-5">
+          <h4>תצוגה מקדימה של הפוסט</h4>
+          <p id="postPreview"></p>
+        </div>
+        <button type="button" class="btn btn-primary" id="copyBtn">
+          העתקה
+        </button>
+        <button type="button" class="btn btn-secondary" id="exportBtn">
+          יצוא לחבר צוות
+        </button>
+        <button type="button" class="btn btn-success" id="whatsappBtn">
+          שלח לשי
+        </button>
+      </form>
+    </div>
+
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Include custom JavaScript -->
+    <script src="scripts.js" type="module"></script>
+  </body>
+</html>
