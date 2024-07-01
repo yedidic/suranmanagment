@@ -173,7 +173,7 @@ document.getElementById("exportBtn").addEventListener("click", () => {
 
 document.getElementById("whatsappBtn").addEventListener("click", () => {
   const message = texts[0].getValue();
-  const phoneNumber = "972559246140";
+  const phoneNumber = "972544818488";
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(
     message
   )}&app_absent=0`;
