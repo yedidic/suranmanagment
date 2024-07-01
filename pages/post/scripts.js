@@ -13,7 +13,7 @@ function parseTextValue(template, data) {
     return "נא למלא את הטופס";
   }
   const replacedText = template
-    .replace(/{date}/g, data.date)
+    .replace(/{formattedDate}/g, data.date)
     .replace(/{hour}/g, data.hour)
     .replace(/{subject}/g, data.subject)
     .replace(/{extensiveSubject}/g, data.extensiveSubject)
@@ -30,7 +30,7 @@ const texts = [
       const storedData = getFromLocalStorage("webinarData");
       return parseTextValue(
         `וובינר עם סוראן
-יתקיים ביום רביעי, {date} בשעה {hour}.
+יתקיים ביום רביעי, {formattedDate} בשעה {hour}.
 בנושא: {subject}.
 {extensiveSubject}
 
@@ -83,14 +83,14 @@ function savePostForm() {
         .slice(-2)}`
     : "";
 
-  const date = formattedDate;
   const hour = form.hour.value;
   const subject = form.subject.value;
   const extensiveSubject = form.extensiveSubject.value || "";
   const cardcomLink = form.cardcomLink.value;
 
   const webinarData = {
-    date: date,
+    formattedDate,
+    date: form.date.value,
     hour: hour,
     subject: subject,
     extensiveSubject: extensiveSubject,
