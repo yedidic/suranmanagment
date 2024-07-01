@@ -1,13 +1,3 @@
-function addToLocalStorage(key, data) {
-  const jsonData = JSON.stringify(data);
-  localStorage.setItem(key, jsonData);
-}
-
-function getFromLocalStorage(key) {
-  const jsonData = localStorage.getItem(key);
-  return jsonData ? JSON.parse(jsonData) : null;
-}
-
 function parseTextValue(template, data) {
   if (!data) {
     return "נא למלא את הטופס";
@@ -74,22 +64,6 @@ function copyToClipboard(text) {
   showToast();
 }
 
-function getFormattedDate(dateString) {
-  const inputDate = dateString ? new Date(dateString) : "";
-  return inputDate
-    ? `${inputDate.getDate()}.${inputDate.getMonth() + 1}.${inputDate
-        .getFullYear()
-        .toString()
-        .slice(-2)}`
-    : "";
-}
-function getDayInWeek(dateString) {
-  const date = new Date(dateString);
-  const options = { weekday: "short" };
-  const day = date.toLocaleDateString("he-IL", options); // 'he-IL' is for Hebrew locale
-  return day;
-}
-
 function savePostForm() {
   const form = document.querySelector("#postForm");
 
@@ -117,18 +91,6 @@ function saveWebinarData(data) {
     "יש ללחוץ על כפתור 'העתק' כדי להעתיק את הפוסט המעודכן",
     "orange"
   );
-}
-
-function getQueryParams() {
-  const params = {};
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-
-  urlParams.forEach((value, key) => {
-    params[key] = value;
-  });
-
-  return params;
 }
 
 function parseQueryParamsAndLocalData() {
