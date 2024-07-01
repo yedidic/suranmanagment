@@ -142,9 +142,8 @@ function createAccordionItems() {
   });
 }
 
-function submitPostForm(event) {
-  event.preventDefault();
-  const form = event.target; // Use the form element passed as an argument
+function submitPostForm(event = undefined) {
+  const form = document.querySelector("#postForm"); // Use the form element passed as an argument
 
   const inputDate = form.date.value ? new Date(form.date.value) : "";
   const formattedDate = inputDate
@@ -162,12 +161,6 @@ function submitPostForm(event) {
 
   // Construct the webinarData object
   const webinarData = {
-    form: {
-      // Optionally, you can store form details if needed
-      id: form.id,
-      name: form.name,
-      // Add more fields as needed
-    },
     date: date,
     hour: hour,
     subject: subject,
@@ -175,8 +168,12 @@ function submitPostForm(event) {
     cardcomLink: cardcomLink,
   };
 
+  saveWebinarData(webinarData);
+}
+
+function saveWebinarData(data) {
   // Adding data to localStorage
-  addToLocalStorage("webinarData", webinarData);
+  addToLocalStorage("webinarData", data);
   createAccordionItems();
   document.querySelector('[data-toggle="collapse"]').click();
   showToast(
@@ -186,5 +183,86 @@ function submitPostForm(event) {
   );
 }
 
+// Function to extract query parameters from URL
+function getQueryParams() {
+  const params = {};
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+
+  urlParams.forEach((value, key) => {
+    params[key] = value;
+  });
+
+  return params;
+}
+
+// Function to parse query parameters and submit the form
+function parseQueryParamsAndLocalData() {
+  const queryParams = getQueryParams();
+  const storedData = getFromLocalStorage("webinarData");
+  const data = { ...(storedData || {}), ...(queryParams || {}) };
+
+  if (Object.keys(data).length > 0) {
+    // Get the form element
+    const form = document.querySelector("#postForm");
+    if (data.date) {
+      form.date.value = data.date;
+    }
+    if (data.hour) {
+      form.hour.value = data.hour;
+    }
+    if (data.subject) {
+      form.subject.value = data.subject;
+    }
+    if (data.extensiveSubject) {
+      form.extensiveSubject.value = data.extensiveSubject;
+    }
+    if (data.cardcomLink) {
+      form.cardcomLink.value = data.cardcomLink;
+    }
+
+    // Call submitPostForm programmatically, passing the form as an argument
+    submitPostForm({ target: form });
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+document.addEventListener("DOMContentLoaded", parseQueryParamsAndLocalData);
 document.addEventListener("DOMContentLoaded", createAccordionItems);
 document.querySelector("#postForm").addEventListener("submit", submitPostForm);
+
+document.getElementById("copyBtn").addEventListener("click", () => {
+  const message = texts[0].getValue();
+  copyToClipboard(message);
+});
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const form = document.querySelector("#postForm");
+
+  const params = new URLSearchParams(new FormData(form)).toString();
+  const exportLink = `${window.location.origin}${window.location.pathname}?${params}`;
+  copyToClipboard(exportLink);
+});
+
+document.getElementById("whatsappBtn").addEventListener("click", () => {
+  const message = texts[0].getValue();
+  const phoneNumber = "972559246140";
+  const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(
+    message
+  )}&app_absent=0`;
+  window.open(whatsappUrl, "_blank");
+});
+
+document
+  .querySelector('#postForm [name="date"]')
+  .addEventListener("blur", submitPostForm);
+document
+  .querySelector('#postForm [name="hour"]')
+  .addEventListener("blur", submitPostForm);
+document
+  .querySelector('#postForm [name="subject"]')
+  .addEventListener("blur", submitPostForm);
+document
+  .querySelector('#postForm [name="extensiveSubject"]')
+  .addEventListener("blur", submitPostForm);
+document
+  .querySelector('#postForm [name="cardcomLink"]')
+  .addEventListener("blur", submitPostForm);
