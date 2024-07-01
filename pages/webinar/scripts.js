@@ -5,7 +5,7 @@ const texts = [
     icon: "fa-door-open",
   },
   {
-    label: "הרמת יד לשאלה",
+    label: "הסבר טכני על הרמת יד לשאלות",
     value: `כשסוראן יזמין אותנו לשאול או לשתף במהלך המעגל  - תוכלו לבקש רשות דיבור על ידי הרמת "יד וירטואלית", זאת בעזרת כפתור
 Raise Hand
 תמצאו אותו בכפתור
@@ -62,7 +62,7 @@ function copyToClipboard(text) {
 }
 
 function createAccordionItems() {
-  document.getElementById("pageSubject").innerText = "טקסטים למהלך הוובינר";
+  document.getElementById("pageSubject").innerText = "טקסטים למהלך הוובינר, להדבקה בצ'אט";
   const accordion = document.getElementById("accordion");
   texts.forEach((item, index) => {
     const card = document.createElement("div");
