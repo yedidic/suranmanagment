@@ -155,6 +155,9 @@ function updatePreview() {
   previewElement.innerText = texts[0].getValue();
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("pageSubject").innerText = "מחולל פוסטים ראשוניים";
+});
 document.addEventListener("DOMContentLoaded", parseQueryParamsAndLocalData);
 document.addEventListener("DOMContentLoaded", updatePreview);
 document.querySelector("#postForm").addEventListener("submit", savePostForm);
