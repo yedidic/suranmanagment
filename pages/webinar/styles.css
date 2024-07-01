@@ -1,6 +1,6 @@
 .copy-button {
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 10px 30px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -15,6 +15,7 @@
 }
 .accordion {
   direction: rtl;
+  text-align: right;
   max-width: 500px; /* Set max width for the accordion */
   margin: auto; /* Center align the accordion */
 }

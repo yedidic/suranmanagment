@@ -79,7 +79,7 @@ const texts = [
       h2.className = "mb-0";
   
       const button = document.createElement("button");
-      button.className = "btn btn-link";
+      button.className = "btn btn-link flex-1";
       button.type = "button";
       button.setAttribute("data-toggle", "collapse");
       button.setAttribute("data-target", `#collapse${index}`);

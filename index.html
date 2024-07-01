@@ -3,56 +3,88 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bootstrap Accordion with Copy Button</title>
-    <!-- Include Bootstrap CSS -->
+    <title>Hidden Links Page</title>
     <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
       rel="stylesheet"
     />
-    <!-- Include Font Awesome CSS -->
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      rel="stylesheet"
-    />
-    <!-- Include custom CSS -->
-    <link href="styles.css" rel="stylesheet" />
+    <style>
+      .list-group {
+        max-width: 500px;
+        margin: 0 auto;
+        text-align: right;
+      }
+    </style>
   </head>
   <body>
     <div class="container mt-5">
-      <div
-        class="toast"
-        id="myToast"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        data-delay="3000"
-      >
-        <div class="toast-header">
-          <strong class="mr-auto">העתקה בוצעה</strong>
-          <small>Just now</small>
-          <button
-            type="button"
-            class="ml-2 mb-1 close"
-            data-dismiss="toast"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
+      <form class="pswForm" onsubmit="checkPassword(event)">
+        <h1 class="text-center">Enter Password to Reveal Links</h1>
+        <div class="mb-2">
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Enter password"
+            />
+          </div>
+          <button class="btn btn-primary" type="submit">Submit</button>
         </div>
-        <div class="toast-body">הטקסט הועתק ללוח</div>
-      </div>
-      <h1 class="text-center mb-5">ממשק ניהול סוראן</h1>
-      <h2 class="text-center mb-5">בתוך הוובינר</h2>
-      <div class="accordion" id="accordion">
-        <!-- Accordion items will be injected here by JavaScript -->
+      </form>
+      <div id="hiddenLinks" class="mt-4 d-none">
+        <h1 class="text-center mb-5">ממשק ניהול סוראן</h1>
+        <ul class="list-group">
+          <li class="list-group-item">
+            <a href="pages/webinar">טקסטים למהלך הוובינר</a>
+          </li>
+          <li class="list-group-item">
+            <a href="https://example.com/link2">Link 2</a>
+          </li>
+          <li class="list-group-item">
+            <a href="https://example.com/link3">Link 3</a>
+          </li>
+          <li class="list-group-item">
+            <a href="https://example.com/link4">Link 4</a>
+          </li>
+          <li class="list-group-item">
+            <a href="https://example.com/link5">Link 5</a>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Include Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <!-- Include custom JavaScript -->
-    <script src="scripts.js"></script>
+    <script>
+      const PSW = "111";
+
+      // Function to check the password
+      function checkPassword(e) {
+        e.preventDefault();
+        var password = document.getElementById("password").value;
+        if (password === PSW) {
+          localStorage.setItem("password", password);
+          revealLinks();
+        } else {
+          alert("Incorrect password!");
+        }
+      }
+
+      // Function to reveal the hidden links
+      function revealLinks() {
+        document.querySelector(".pswForm").classList.add("d-none");
+        document.querySelector("#hiddenLinks").classList.remove("d-none");
+      }
+
+      // Check if the password is already stored in localStorage
+      document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem("password") === PSW) {
+          revealLinks();
+        }
+      });
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
