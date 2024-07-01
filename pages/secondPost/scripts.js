@@ -1,47 +1,35 @@
-function addToLocalStorage(key, data) {
-  const jsonData = JSON.stringify(data);
-  localStorage.setItem(key, jsonData);
-}
-
-function getFromLocalStorage(key) {
-  const jsonData = localStorage.getItem(key);
-  return jsonData ? JSON.parse(jsonData) : null;
-}
-
 function parseTextValue(template, data) {
   if (!data) {
     return "נא למלא את הטופס";
   }
   const replacedText = template
-    .replace(/{formattedDate}/g, data.formattedDate)
+    .replace(/{richText}/g, data.richText)
+    .replace(/{day}/g, getDayInWeek(data.date))
+    .replace(/{date}/g, getFormattedDate(data.date))
     .replace(/{hour}/g, data.hour)
     .replace(/{subject}/g, data.subject)
-    .replace(/{extensiveSubject}/g, data.extensiveSubject)
-    .replace(/{cardcomLink}/g, data.cardcomLink);
+    .replace(/{registrationLink}/g, data.registrationLink);
   return replacedText;
 }
 
 const texts = [
   {
     copyButtonClassName: "copyPostButton",
-    label: "פוסט לפרסום במדיה (יש להוסיף תמונה מה-AI)",
+    label: "פוסט שני לפרסום במדיה",
     icon: "fa-edit",
     getValue: () => {
-      const storedData = getFromLocalStorage("webinarData");
+      const storedData = getFromLocalStorage("secondPostData");
       return parseTextValue(
-        `וובינר עם סוראן
-יתקיים ביום רביעי, {formattedDate}, בשעה {hour}.
-בנושא: {subject}.
-{extensiveSubject}
+        `{richText}
 
-מחיר הרשמה מוקדמת (עד 14:00 ביום האירוע): 50 ש"ח.
-מחיר הרשמה רגילה (אחרי 14:00 ביום האירוע): 60 ש"ח.
 
-לחצו כאן להרשמה לוובינר:
-{cardcomLink}
+מחר, יום {day}, {date}, ניפגש ב"זום" לוובינר עם סוראן:
+{subject}
 
-* לחווים קושי כלכלי בתקופה זו מוצע מחיר מוזל במסגרת ההרשמה המוקדמת.
-* ההרשמה היא להשתתפות במפגש החי, ואינה כוללת קבלה של הקלטת המפגש.`,
+
+להרשמה: {registrationLink}
+מייל לפניות ושאלות: info@suran.co.il
+ציור: DALL E AI`,
         storedData
       );
     },
@@ -75,34 +63,26 @@ function copyToClipboard(text) {
 
 function savePostForm() {
   const form = document.querySelector("#postForm");
-  const inputDate = form.date.value ? new Date(form.date.value) : "";
-  const formattedDate = inputDate
-    ? `${inputDate.getDate()}.${inputDate.getMonth() + 1}.${inputDate
-        .getFullYear()
-        .toString()
-        .slice(-2)}`
-    : "";
 
+  const richText = form.richText.value;
   const hour = form.hour.value;
   const subject = form.subject.value;
-  const extensiveSubject = form.extensiveSubject.value || "";
-  const cardcomLink = form.cardcomLink.value;
+  const registrationLink = form.registrationLink.value;
 
-  const webinarData = {
-    formattedDate,
+  const secondPostData = {
+    richText: richText,
     date: form.date.value,
     hour: hour,
     subject: subject,
-    extensiveSubject: extensiveSubject,
-    cardcomLink: cardcomLink,
+    registrationLink: registrationLink,
   };
 
-  saveWebinarData(webinarData);
+  saveSecondPostData(secondPostData);
   updatePreview();
 }
 
-function saveWebinarData(data) {
-  addToLocalStorage("webinarData", data);
+function saveSecondPostData(data) {
+  addToLocalStorage("secondPostData", data);
   showToast(
     "הפוסט התעדכן",
     "יש ללחוץ על כפתור 'העתק' כדי להעתיק את הפוסט המעודכן",
@@ -110,25 +90,16 @@ function saveWebinarData(data) {
   );
 }
 
-function getQueryParams() {
-  const params = {};
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-
-  urlParams.forEach((value, key) => {
-    params[key] = value;
-  });
-
-  return params;
-}
-
 function parseQueryParamsAndLocalData() {
   const queryParams = getQueryParams();
-  const storedData = getFromLocalStorage("webinarData");
+  const storedData = getFromLocalStorage("secondPostData");
   const data = { ...(storedData || {}), ...(queryParams || {}) };
 
   if (Object.keys(data).length > 0) {
     const form = document.querySelector("#postForm");
+    if (data.richText) {
+      form.richText.value = data.richText;
+    }
     if (data.date) {
       form.date.value = data.date;
     }
@@ -138,11 +109,8 @@ function parseQueryParamsAndLocalData() {
     if (data.subject) {
       form.subject.value = data.subject;
     }
-    if (data.extensiveSubject) {
-      form.extensiveSubject.value = data.extensiveSubject;
-    }
-    if (data.cardcomLink) {
-      form.cardcomLink.value = data.cardcomLink;
+    if (data.registrationLink) {
+      form.registrationLink.value = data.registrationLink;
     }
 
     savePostForm({ target: form });
@@ -156,7 +124,7 @@ function updatePreview() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("pageSubject").innerText = "מחולל פוסטים ראשוניים";
+  document.getElementById("pageSubject").innerText = "מחולל פוסטים שני";
 });
 document.addEventListener("DOMContentLoaded", parseQueryParamsAndLocalData);
 document.addEventListener("DOMContentLoaded", updatePreview);
@@ -183,10 +151,8 @@ document.getElementById("whatsappBtn").addEventListener("click", () => {
   window.open(whatsappUrl, "_blank");
 });
 
-["date", "hour", "subject", "extensiveSubject", "cardcomLink"].forEach(
-  (name) => {
-    document
-      .querySelector(`#postForm [name="${name}"]`)
-      .addEventListener("blur", savePostForm);
-  }
-);
+["richText", "date", "hour", "subject", "registrationLink"].forEach((name) => {
+  document
+    .querySelector(`#postForm [name="${name}"]`)
+    .addEventListener("blur", savePostForm);
+});

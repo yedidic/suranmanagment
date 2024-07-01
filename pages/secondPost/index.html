@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ממשק ניהול סוראן</title>
+    <title>ממשק ניהול סוראן - פוסט שני</title>
     <!-- Include Bootstrap CSS -->
     <link
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -44,8 +44,19 @@
       <a href="/suranmanagment"
         ><h1 class="text-center mb-5">ממשק ניהול סוראן</h1></a
       >
-      <h2 class="text-center mb-5" id="pageSubject">נושא העמוד</h2>
+      <h2 class="text-center mb-5" id="pageSubject">פוסט שני</h2>
       <form id="postForm" class="mb-5">
+        <div class="form-group">
+          <label for="richText">תיאור המעגל*</label>
+          <textarea
+            class="form-control"
+            id="richText"
+            name="richText"
+            rows="3"
+            placeholder="לדוג': טקסט עשיר שמכיל תיאור של נושא המעגל"
+            required
+          ></textarea>
+        </div>
         <div class="form-group">
           <label for="date">תאריך*</label>
           <input
@@ -79,23 +90,13 @@
           />
         </div>
         <div class="form-group">
-          <label for="extensiveSubject">נושא מורחב (אופציונלי)</label>
-          <textarea
-            class="form-control"
-            id="extensiveSubject"
-            name="extensiveSubject"
-            rows="3"
-            placeholder="לדוג': השימוש בחזית האנרגטית בתקופה של קושי כללי"
-          ></textarea>
-        </div>
-        <div class="form-group">
-          <label for="cardcomLink">קישור לדף נחיתה בקארדקום*</label>
+          <label for="registrationLink">קישור להרשמה*</label>
           <input
             type="url"
             class="form-control"
-            id="cardcomLink"
-            name="cardcomLink"
-            value="https://secure.cardcom.solutions/EA/EA5/xhfS"
+            id="registrationLink"
+            name="registrationLink"
+            value="https://suran.co.il"
             required
           />
         </div>
@@ -120,6 +121,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <!-- Include custom JavaScript -->
+    <script src="../../utils.js"></script>
     <script src="scripts.js" type="module"></script>
   </body>
 </html>

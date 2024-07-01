@@ -29,7 +29,7 @@ function getFormattedDate(dateString) {
 }
 function getDayInWeek(dateString) {
   const date = new Date(dateString);
-  const options = { weekday: "short" };
+  const options = { weekday: "long" };
   const day = date.toLocaleDateString("he-IL", options); // 'he-IL' is for Hebrew locale
-  return day;
+  return day.split(" ")[1];// ראשון | שני | שלישי | רביעי | חמישי | שישי | שבת
 }
