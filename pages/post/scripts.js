@@ -13,7 +13,7 @@ function parseTextValue(template, data) {
     return "נא למלא את הטופס";
   }
   const replacedText = template
-    .replace(/{formattedDate}/g, data.date)
+    .replace(/{formattedDate}/g, data.formattedDate)
     .replace(/{hour}/g, data.hour)
     .replace(/{subject}/g, data.subject)
     .replace(/{extensiveSubject}/g, data.extensiveSubject)
@@ -30,7 +30,7 @@ const texts = [
       const storedData = getFromLocalStorage("webinarData");
       return parseTextValue(
         `וובינר עם סוראן
-יתקיים ביום רביעי, {formattedDate} בשעה {hour}.
+יתקיים ביום רביעי, {formattedDate}, בשעה {hour}.
 בנושא: {subject}.
 {extensiveSubject}
 
