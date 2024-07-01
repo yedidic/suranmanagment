@@ -1,0 +1,35 @@
+#postForm {
+  max-width: 500px;
+  margin: 0 auto;
+  direction: rtl;
+  text-align: right;
+}
+.copy-button {
+  cursor: pointer;
+  padding: 10px 30px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+}
+.copy-button:hover {
+  background-color: #0056b3;
+}
+.copy-button i {
+  margin-right: 5px;
+}
+.accordion {
+  direction: rtl;
+  text-align: right;
+  max-width: 500px; /* Set max width for the accordion */
+  margin: auto; /* Center align the accordion */
+}
+.toast {
+  position: fixed;
+  top: 50px;
+  left: 50px;
+  width: 300px;
+  background-color: lightgreen;
+  z-index: 999;
+}
