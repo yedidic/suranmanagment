@@ -19,11 +19,11 @@
 .copy-button i {
   margin-right: 5px;
 }
-.accordion {
+.preview-box {
   direction: rtl;
   text-align: right;
-  max-width: 500px; /* Set max width for the accordion */
-  margin: auto; /* Center align the accordion */
+  max-width: 500px;
+  margin: 0 auto;
 }
 .toast {
   position: fixed;
