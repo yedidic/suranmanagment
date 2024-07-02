@@ -22,10 +22,8 @@ const texts = [
       return parseTextValue(
         `{richText}
 
-
-מחר, יום {day}, {date}, ניפגש ב"זום" לוובינר עם סוראן:
+מחר, יום {day} {date}, בשעה {hour}, נפגש ב"זום" לוובינר עם סוראן בנושא:
 {subject}
-
 
 להרשמה: {registrationLink}
 מייל לפניות ושאלות: info@suran.co.il
