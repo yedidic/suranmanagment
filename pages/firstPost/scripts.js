@@ -1,3 +1,16 @@
+const POST_BASE = `וובינר עם סוראן
+יתקיים ביום {day}, {formattedDate}, בשעה {hour}.
+בנושא: {subject}.
+{extensiveSubject}
+
+מחיר הרשמה מוקדמת (עד 14:00 ביום האירוע): 50 ש"ח.
+מחיר הרשמה רגילה (אחרי 14:00 ביום האירוע): 60 ש"ח.
+
+לחצו כאן להרשמה לוובינר:
+{cardcomLink}
+
+* לחווים קושי כלכלי בתקופה זו מוצע מחיר מוזל במסגרת ההרשמה המוקדמת.
+* ההרשמה היא להשתתפות במפגש החי, ואינה כוללת קבלה של הקלטת המפגש.`;
 const LOCAL_STORAGE_KEY = "firstPostData";
 
 function parseTextValue(template, data) {
@@ -21,22 +34,7 @@ const texts = [
     icon: "fa-edit",
     getValue: () => {
       const storedData = getFromLocalStorage(LOCAL_STORAGE_KEY);
-      return parseTextValue(
-        `וובינר עם סוראן
-יתקיים ביום {day}, {formattedDate}, בשעה {hour}.
-בנושא: {subject}.
-{extensiveSubject}
-
-מחיר הרשמה מוקדמת (עד 14:00 ביום האירוע): 50 ש"ח.
-מחיר הרשמה רגילה (אחרי 14:00 ביום האירוע): 60 ש"ח.
-
-לחצו כאן להרשמה לוובינר:
-{cardcomLink}
-
-* לחווים קושי כלכלי בתקופה זו מוצע מחיר מוזל במסגרת ההרשמה המוקדמת.
-* ההרשמה היא להשתתפות במפגש החי, ואינה כוללת קבלה של הקלטת המפגש.`,
-        storedData
-      );
+      return parseTextValue(POST_BASE, storedData);
     },
   },
 ];
@@ -128,11 +126,45 @@ function updatePreview() {
   previewElement.innerText = texts[0].getValue();
 }
 
+function createGoogleCalendarEvent({
+  date,
+  hour,
+  subject,
+  extensiveSubject,
+  cardcomLink,
+}) {
+  const title = `וובינר עם סוראן: ${subject}`;
+  const startDateTime = new Date(`${date}T${hour}`)
+    .toISOString()
+    .replace(/-|:|\.\d+/g, "");
+  const endDateTime = new Date(
+    new Date(`${date}T${hour}`).getTime() + 90 * 60 * 1000
+  )
+    .toISOString()
+    .replace(/-|:|\.\d+/g, ""); // Adding 1.5 hour for the end time
+
+  const eventDetails = parseTextValue(POST_BASE, {
+    date,
+    hour,
+    subject,
+    extensiveSubject,
+    cardcomLink,
+  });
+
+  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
+    title
+  )}&dates=${startDateTime}/${endDateTime}&details=${encodeURIComponent(
+    eventDetails
+  )}&location=${encodeURIComponent("Online")}&trp=true`;
+
+  return url;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("pageSubject").innerText = "מחולל פוסטים ראשוניים";
+  parseQueryParamsAndLocalData();
+  updatePreview();
 });
-document.addEventListener("DOMContentLoaded", parseQueryParamsAndLocalData);
-document.addEventListener("DOMContentLoaded", updatePreview);
 
 document.getElementById("copyBtn").addEventListener("click", () => {
   const message = texts[0].getValue();
@@ -152,6 +184,12 @@ document.getElementById("whatsappBtn").addEventListener("click", () => {
   const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(
     message
   )}&app_absent=0`;
+  window.open(whatsappUrl, "_blank");
+});
+
+document.getElementById("gCalendarButton").addEventListener("click", () => {
+  const storedData = getFromLocalStorage(LOCAL_STORAGE_KEY);
+  const whatsappUrl = createGoogleCalendarEvent(storedData);
   window.open(whatsappUrl, "_blank");
 });
 
