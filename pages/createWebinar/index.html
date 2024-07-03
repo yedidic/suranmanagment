@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ממשק ניהול סוראן</title>
+    <!-- Include Bootstrap CSS -->
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Include Font Awesome CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
+    <!-- Include custom CSS -->
+    <link href="styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-5 mb-5">
+      <a href="/suranmanagment"
+        ><h1 class="text-center mb-5">ממשק ניהול סוראן</h1></a
+      >
+      <h2 class="text-center mb-5" id="pageSubject">יצירת וובינר</h2>
+
+      <div class="createWebinar">
+        <h4 class="mt-4">צעדים נדרשים לפתיחת וובינר:</h4>
+        <div class="accordion" id="accordionExample">
+          <div class="card">
+            <div class="card-header" id="headingOne">
+              <h2 class="mb-0">
+                <button
+                  class="btn btn-link"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#collapseOne"
+                  aria-expanded="true"
+                  aria-controls="collapseOne"
+                >
+                  1. <i class="fas fa-video"></i> פתיחת מפגש בזום
+                </button>
+              </h2>
+            </div>
+
+            <div
+              id="collapseOne"
+              class="collapse show"
+              aria-labelledby="headingOne"
+              data-parent="#accordionExample"
+            >
+              <div class="card-body">
+                <a href="https://zoom.us/meeting/schedule" target="_blank"
+                  >פתיחת מפגש בזום</a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" id="headingTwo">
+              <h2 class="mb-0">
+                <button
+                  class="btn btn-link collapsed"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#collapseTwo"
+                  aria-expanded="false"
+                  aria-controls="collapseTwo"
+                >
+                  2. <i class="fas fa-envelope"></i> פתיחת רשימת תפוצה ברב מסר
+                </button>
+              </h2>
+            </div>
+            <div
+              id="collapseTwo"
+              class="collapse"
+              aria-labelledby="headingTwo"
+              data-parent="#accordionExample"
+            >
+              <div class="card-body">
+                <ol>
+                  <li>
+                    <div class="py-2">
+                      <a
+                        href="https://cp.responder.co.il/login/campaigns_add.php"
+                        target="_blank"
+                        >יצירת רשימת תפוצה חדשה</a
+                      >
+                    </div>
+                    <img
+                      src="../../assets/responder/createList.png"
+                      width="500"
+                    />
+                    <div class="py-2">
+                      להציב את הנושא והתאריך <br />
+                      <b
+                        >חשוב: להציב במקום הmeetingId את מספר המפגש שיצרת
+                        בזום</b
+                      >
+                      <br />
+                      לשמירה, נגלול למטה, ונלחץ על כפתור "שמור":
+                      <img
+                        src="../../assets/responder/saveNewList.png"
+                        width="500"
+                      />
+                    </div>
+                  </li>
+                  <li>
+                    <div class="py-2">
+                      בחירת רשימת תפוצה של וובינר קודם ברב מסר
+                    </div>
+                    <img
+                      src="../../assets/responder/chooseList.png"
+                      width="500"
+                    />
+                  </li>
+                  <li>
+                    <div class="py-2">מעבר לסדרת מסרים</div>
+                    <img
+                      src="../../assets/responder/moveToMessageInRow.png"
+                      width="500"
+                    />
+                  </li>
+                  <li>
+                    <div class="py-2">
+                      העתקת המסר הקודם לתוך רשימת התפוצה החדשה שיצרת
+                    </div>
+                    <img
+                      src="../../assets/responder/copyMessageInRow.png"
+                      width="500"
+                    />
+                  </li>
+                  <li>
+                    <div class="py-2">בחירת הרשימה החדשה שיצרת</div>
+                    <img
+                      src="../../assets/responder/chooseMessagetoCopyMessageInRowTo.png"
+                      width="500"
+                    />
+                  </li>
+                  <li>עריכת המסר המועתק והתאמתו לנושא המעגל</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" id="headingThree">
+              <h2 class="mb-0">
+                <button
+                  class="btn btn-link collapsed"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#collapseThree"
+                  aria-expanded="false"
+                  aria-controls="collapseThree"
+                >
+                  3. <i class="fas fa-ticket-alt"></i> עדכון קופון הנחה ברב־מסר
+                </button>
+              </h2>
+            </div>
+            <div
+              id="collapseThree"
+              class="collapse"
+              aria-labelledby="headingThree"
+              data-parent="#accordionExample"
+            >
+              <div class="card-body">
+                Content for updating discount coupon in רב־מסר.
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" id="headingFour">
+              <h2 class="mb-0">
+                <button
+                  class="btn btn-link collapsed"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#collapseFour"
+                  aria-expanded="false"
+                  aria-controls="collapseFour"
+                >
+                  4. <i class="fas fa-credit-card"></i> עדכון דף נחיתה בקארדקום
+                </button>
+              </h2>
+            </div>
+            <div
+              id="collapseFour"
+              class="collapse"
+              aria-labelledby="headingFour"
+              data-parent="#accordionExample"
+            >
+              <div class="card-body">
+                Content for updating the landing page in קארדקום.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Include custom JavaScript -->
+    <script src="../../utils.js"></script>
+    <script src="scripts.js" type="module"></script>
+  </body>
+</html>
