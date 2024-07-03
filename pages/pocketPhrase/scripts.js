@@ -1,9 +1,10 @@
+const LOCAL_STORAGE_KEY = "secondPostData";
 function parseTextValue(template, data) {
   if (!data) {
     return "נא למלא את הטופס";
   }
   const replacedText = template
-    .replace(/{richText}/g, data.richText)
+    .replace(/{pocketPhrase}/g, data.pocketPhrase)
     .replace(/{day}/g, getDayInWeek(data.date))
     .replace(/{date}/g, getFormattedDate(data.date))
     .replace(/{hour}/g, data.hour)
@@ -18,9 +19,9 @@ const texts = [
     label: "פוסט שני לפרסום במדיה",
     icon: "fa-edit",
     getValue: () => {
-      const storedData = getFromLocalStorage("secondPostData");
+      const storedData = getFromLocalStorage(LOCAL_STORAGE_KEY);
       return parseTextValue(
-        `{richText}
+        `{pocketPhrase}
 
 מחר, יום {day} {date}, בשעה {hour}, נפגש ב"זום" לוובינר עם סוראן בנושא:
 {subject}
@@ -62,13 +63,13 @@ function copyToClipboard(text) {
 function savePostForm() {
   const form = document.querySelector("#postForm");
 
-  const richText = form.richText.value;
+  const pocketPhrase = form.pocketPhrase.value;
   const hour = form.hour.value;
   const subject = form.subject.value;
   const registrationLink = form.registrationLink.value;
 
   const secondPostData = {
-    richText: richText,
+    pocketPhrase: pocketPhrase,
     date: form.date.value,
     hour: hour,
     subject: subject,
@@ -80,7 +81,7 @@ function savePostForm() {
 }
 
 function saveSecondPostData(data) {
-  addToLocalStorage("secondPostData", data);
+  addToLocalStorage(LOCAL_STORAGE_KEY, data);
   showToast(
     "הפוסט התעדכן",
     "יש ללחוץ על כפתור 'העתק' כדי להעתיק את הפוסט המעודכן",
@@ -90,13 +91,13 @@ function saveSecondPostData(data) {
 
 function parseQueryParamsAndLocalData() {
   const queryParams = getQueryParams();
-  const storedData = getFromLocalStorage("secondPostData");
+  const storedData = getFromLocalStorage(LOCAL_STORAGE_KEY);
   const data = { ...(storedData || {}), ...(queryParams || {}) };
 
   if (Object.keys(data).length > 0) {
     const form = document.querySelector("#postForm");
-    if (data.richText) {
-      form.richText.value = data.richText;
+    if (data.pocketPhrase) {
+      form.pocketPhrase.value = data.pocketPhrase;
     }
     if (data.date) {
       form.date.value = data.date;
@@ -149,8 +150,10 @@ document.getElementById("whatsappBtn").addEventListener("click", () => {
   window.open(whatsappUrl, "_blank");
 });
 
-["richText", "date", "hour", "subject", "registrationLink"].forEach((name) => {
-  document
-    .querySelector(`#postForm [name="${name}"]`)
-    .addEventListener("blur", savePostForm);
-});
+["pocketPhrase", "date", "hour", "subject", "registrationLink"].forEach(
+  (name) => {
+    document
+      .querySelector(`#postForm [name="${name}"]`)
+      .addEventListener("blur", savePostForm);
+  }
+);

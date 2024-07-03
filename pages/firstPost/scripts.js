@@ -1,3 +1,5 @@
+const LOCAL_STORAGE_KEY = "firstPostData";
+
 function parseTextValue(template, data) {
   if (!data) {
     return "נא למלא את הטופס";
@@ -18,7 +20,7 @@ const texts = [
     label: "פוסט לפרסום במדיה (יש להוסיף תמונה מה-AI)",
     icon: "fa-edit",
     getValue: () => {
-      const storedData = getFromLocalStorage("webinarData");
+      const storedData = getFromLocalStorage(LOCAL_STORAGE_KEY);
       return parseTextValue(
         `וובינר עם סוראן
 יתקיים ביום {day}, {formattedDate}, בשעה {hour}.
@@ -85,7 +87,7 @@ function savePostForm() {
 }
 
 function saveWebinarData(data) {
-  addToLocalStorage("webinarData", data);
+  addToLocalStorage(LOCAL_STORAGE_KEY, data);
   showToast(
     "הפוסט התעדכן",
     "יש ללחוץ על כפתור 'העתק' כדי להעתיק את הפוסט המעודכן",
@@ -95,7 +97,7 @@ function saveWebinarData(data) {
 
 function parseQueryParamsAndLocalData() {
   const queryParams = getQueryParams();
-  const storedData = getFromLocalStorage("webinarData");
+  const storedData = getFromLocalStorage(LOCAL_STORAGE_KEY);
   const data = { ...(storedData || {}), ...(queryParams || {}) };
 
   if (Object.keys(data).length > 0) {
