@@ -4,5 +4,9 @@
   direction: rtl;
   text-align: right;
 }
-
-
+.createWebinar img {
+  max-width: 500px;
+  object-fit: contain;
+  border: 1.5px solid darkgray;
+  margin: 1em 0;
+}
