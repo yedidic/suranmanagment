@@ -133,7 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 document.addEventListener("DOMContentLoaded", parseQueryParamsAndLocalData);
 document.addEventListener("DOMContentLoaded", updatePreview);
-document.querySelector("#postForm").addEventListener("submit", savePostForm);
 
 document.getElementById("copyBtn").addEventListener("click", () => {
   const message = texts[0].getValue();
