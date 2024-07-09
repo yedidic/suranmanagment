@@ -3,13 +3,18 @@ function parseTextValue(template, data) {
   if (!data) {
     return "נא למלא את הטופס";
   }
-  const replacedText = template
+  let replacedText = template
     .replace(/{pocketPhrase}/g, data.pocketPhrase)
     .replace(/{day}/g, getDayInWeek(data.date))
     .replace(/{date}/g, getFormattedDate(data.date))
     .replace(/{hour}/g, data.hour)
     .replace(/{subject}/g, data.subject)
     .replace(/{registrationLink}/g, data.registrationLink);
+
+  if (data.extraText && data.extraText.trim() !== "") {
+    replacedText += "\n\n**\n\n" + data.extraText;
+  }
+
   return replacedText;
 }
 
@@ -59,7 +64,6 @@ function copyToClipboard(text) {
   document.body.removeChild(textarea);
   showToast();
 }
-
 function savePostForm() {
   const form = document.querySelector("#postForm");
 
@@ -67,6 +71,7 @@ function savePostForm() {
   const hour = form.hour.value;
   const subject = form.subject.value;
   const registrationLink = form.registrationLink.value;
+  const extraText = form.extraText.value;
 
   const secondPostData = {
     pocketPhrase: pocketPhrase,
@@ -74,6 +79,7 @@ function savePostForm() {
     hour: hour,
     subject: subject,
     registrationLink: registrationLink,
+    extraText: extraText,
   };
 
   saveSecondPostData(secondPostData);
@@ -110,6 +116,9 @@ function parseQueryParamsAndLocalData() {
     }
     if (data.registrationLink) {
       form.registrationLink.value = data.registrationLink;
+    }
+    if (data.extraText) {
+      form.extraText.value = data.extraText;
     }
 
     savePostForm({ target: form });
@@ -150,10 +159,15 @@ document.getElementById("whatsappBtn").addEventListener("click", () => {
   window.open(whatsappUrl, "_blank");
 });
 
-["pocketPhrase", "date", "hour", "subject", "registrationLink"].forEach(
-  (name) => {
-    document
-      .querySelector(`#postForm [name="${name}"]`)
-      .addEventListener("blur", savePostForm);
-  }
-);
+[
+  "pocketPhrase",
+  "date",
+  "hour",
+  "subject",
+  "registrationLink",
+  "extraText",
+].forEach((name) => {
+  document
+    .querySelector(`#postForm [name="${name}"]`)
+    .addEventListener("blur", savePostForm);
+});
