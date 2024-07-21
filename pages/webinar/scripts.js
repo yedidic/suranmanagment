@@ -5,6 +5,33 @@ const texts = [
     icon: "fa-door-open",
   },
   {
+    label: "ניהול המשתתפים בזמן המעגל",
+    value: `לבקש משי שיר להפעלה בתחילת או בסוף המעגל
+
+בתחילת המעגל או בבדיקת הסאונד לוודא שהמיק הנכון של שי הוא הפעיל.
+ 
+ביטול אפשרות המשתתפים להשתיק את עצמם בתחילת המעגל:
+בתוך Participants:
+uncheck: "allow participants to unmute themselves"
+*In chat* - check: participants can message only host and cohost
+
+בפתיחה ובסגירה, אחרי שסוראן אומר שלום או ערב טוב, לעשות "allow participants to unmute themselves", לוודא שכולם השתיקו לאחר מכן.
+
+כשמישהו רוצה לשאול, לעשות לו:
+"Ask to unmute" ו- Ask video on"
+"Add spotlight" ו- "remove spotlight" לשואל הקודם.
+
+*תשובה גנרית למי שלא רוצה לשאול בקול:*
+
+היי, אנו מעדיפים שהשואלים ישאלו בקולם. זה גם מאפשר לסוראן לענות תשובה אישית יותר ולא כללית. יש באפשרותך לשאול רק במיקרופון, בלי לציין את שמך, ובלי מצלמה, ואפשר גם לשנות את שמך שמופיע לכינוי כללי. האם יש לך אפשרות לשאול במיקרופון במצב זה?
+
+*הערה לגבי וידאו:*
+
+עוד נקודה קטנה היא שלפעמים כדאי להעיף מבט בכל הוידאואים. כבר היה לנו פעם אחת עירום. פעם אחת מפשעה. פעם אחת מישהו פולה פרעושים לחתול. ואינספור אוכלים  ומדברים בטלפון וכו'..   במקרים חריגים אני סוגר להם וידאו.`,
+    icon: "fa-users-cog",
+    nonCopyable: true,
+  },
+  {
     label: "הסבר טכני על הרמת יד לשאלות",
     value: `כשסוראן יזמין אותנו לשאול או לשתף במהלך המעגל  - תוכלו לבקש רשות דיבור על ידי הרמת "יד וירטואלית", זאת בעזרת כפתור
 Raise Hand
@@ -39,6 +66,15 @@ info@suran.co.il
   הישארו איתנו עוד כמה דקות גם אחרי שסוראן יסיים - עד לסיום המפגש.`,
     icon: "fa-door-closed",
   },
+  // Add the new panel here
+  {
+    label: "סגירת המעגל",
+    html: `1. <a href="https://drive.google.com/drive/folders/12qf3ZQtuU23n5M0P12AMZJPyZGb8uvOQ" target="_blank"><strong>הורדת הקלטת המעגל מהזום והעלאה לדרייב</strong></a>.<br>
+2. <a href="https://docs.google.com/spreadsheets/d/1DAeFM2HxwXaXmyMPqpx4CVQRns9nd97IoCnCXi7MAFk/edit" target="_blank"><strong>הוספת משפט כיס לטבלה</strong></a>.<br>
+3. <a href="https://docs.google.com/document/d/17ZC8WK2E9R5UbbYyuMed2K02Cd-rczHvcr_T_nNMY3o/edit" target="_blank"><strong>הוספה לרשימת כל המעגלים</strong></a>.`,
+    icon: "fa-times-circle",
+    nonCopyable: true,
+  },
 ];
 
 // Get the toast element
@@ -63,7 +99,7 @@ function copyToClipboard(text) {
 }
 
 function createAccordionItems() {
-  document.getElementById("pageSubject").innerText = "טקסטים למהלך הוובינר, להדבקה בצ'אט";
+  document.getElementById("pageSubject").innerText = "ניהול הוובינר בפועל";
   const accordion = document.getElementById("accordion");
   texts.forEach((item, index) => {
     const card = document.createElement("div");
@@ -88,13 +124,17 @@ function createAccordionItems() {
 
     h2.appendChild(button);
 
-    const copyButton = document.createElement("button");
-    copyButton.className = "copy-button btn btn-primary";
-    copyButton.innerHTML = `<i class="fas fa-copy"></i> העתק`;
-    copyButton.onclick = () => copyToClipboard(item.value);
+    if (!item.nonCopyable) {
+      const copyButton = document.createElement("button");
+      copyButton.className = "copy-button btn btn-primary";
+      copyButton.innerHTML = `<i class="fas fa-copy"></i> העתק`;
+      copyButton.onclick = () => copyToClipboard(item.value);
 
-    cardHeader.appendChild(h2);
-    cardHeader.appendChild(copyButton);
+      cardHeader.appendChild(h2);
+      cardHeader.appendChild(copyButton);
+    } else {
+      cardHeader.appendChild(h2);
+    }
 
     const collapseDiv = document.createElement("div");
     collapseDiv.id = `collapse${index}`;
@@ -104,7 +144,12 @@ function createAccordionItems() {
 
     const cardBody = document.createElement("div");
     cardBody.className = "card-body";
-    cardBody.innerText = item.value;
+    if (item.value) {
+      cardBody.innerText = item.value;
+    }
+    if (item.html) {
+      cardBody.innerHTML = item.html;
+    }
 
     collapseDiv.appendChild(cardBody);
     card.appendChild(cardHeader);
