@@ -10,6 +10,8 @@ const texts = [
 
 בתחילת המעגל או בבדיקת הסאונד לוודא שהמיק הנכון של שי הוא הפעיל.
  
+להוסיף ספוטלייט לשי/סוראן
+
 ביטול אפשרות המשתתפים להשתיק את עצמם בתחילת המעגל:
 בתוך Participants:
 uncheck: "allow participants to unmute themselves"
