@@ -14,7 +14,7 @@ const texts = [
 <b>In Chat</b> ➡️ <i class="fas fa-check-square"></i>  <span style="color:red;">CHECK: </span> Participants can chat with ↘️ "Host and co-host"<br><br>
 </div>בפתיחה ובסגירה, אחרי שסוראן אומר שלום או ערב טוב, ללחוץ, בתוך Participants:<br>
 <div style="text-align: left;" dir="ltr"><b>"Allow participants to unmute themselves"</b></div>
-ולוודא שכולם השתיקו לאחר מכן.<br><br>
+ולוודא שכולם השתיקו לאחר מכן. אם לא, להשתיק אותם אחד אחד.<br><br>
 <b><i>שאלות</i></b><br><br>
 
 
