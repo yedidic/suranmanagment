@@ -1,6 +1,6 @@
 const POST_BASE = `וובינר עם סוראן
 יתקיים ביום {day}, {formattedDate}, בשעה {hour}.
-בנושא: {subject}.
+בנושא: {subject}
 {extensiveSubject}
 
 מחיר הרשמה מוקדמת (עד 14:00 ביום האירוע): 50 ש"ח.
