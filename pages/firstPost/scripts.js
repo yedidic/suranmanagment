@@ -7,7 +7,7 @@ const POST_BASE = `וובינר עם סוראן
 מחיר הרשמה רגילה (אחרי 14:00 ביום האירוע): 60 ש"ח.
 
 לחצו כאן להרשמה לוובינר:
-{cardcomLink}
+{cardcomLink}{energeticCircle}
 
 * לחווים קושי כלכלי בתקופה זו מוצע מחיר מוזל במסגרת ההרשמה המוקדמת.
 * ההרשמה היא להשתתפות במפגש החי, ואינה כוללת קבלה של הקלטת המפגש.`;
@@ -23,7 +23,14 @@ function parseTextValue(template, data) {
     .replace(/{hour}/g, data.hour)
     .replace(/{subject}/g, data.subject)
     .replace(/{extensiveSubject}/g, data.extensiveSubject)
-    .replace(/{cardcomLink}/g, data.cardcomLink);
+    .replace(/{cardcomLink}/g, data.cardcomLink)
+    .replace(
+      /{energeticCircle}/g,
+      data.isEnergyCircle
+        ? `\nזהו מעגל בתחום "ההבעה הרגשית האנרגטית", והוא מומלץ לאלה שמרגישים מנוסים ומיומנים בתהליכי ההבעה הרגשית הרגילה וההתנהלות המדויקת ביומיום (הוראת העשור הראשון), וכן לכל מי שהשתתפ/ה במעגלי ההבעה הרגשית האנרגטית ו'יצירת יש מאין' הקודמים או מאזינ/ה לקורס בנושא זה במסגרת תוכנית המנויים באתר.\n`
+        : ""
+    );
+
   return replacedText;
 }
 
@@ -71,6 +78,7 @@ function savePostForm() {
   const subject = form.subject.value;
   const extensiveSubject = form.extensiveSubject.value || "";
   const cardcomLink = form.cardcomLink.value;
+  const isEnergyCircle = !!form.energyCircle.checked;
 
   const webinarData = {
     date: form.date.value,
@@ -78,6 +86,7 @@ function savePostForm() {
     subject: subject,
     extensiveSubject: extensiveSubject,
     cardcomLink: cardcomLink,
+    isEnergyCircle,
   };
 
   saveWebinarData(webinarData);
@@ -115,6 +124,9 @@ function parseQueryParamsAndLocalData() {
     if (data.cardcomLink) {
       form.cardcomLink.value = data.cardcomLink;
     }
+    if (data.isEnergyCircle) {
+      form.energyCircle.checked = true;
+    }
 
     savePostForm({ target: form });
     window.history.replaceState({}, document.title, window.location.pathname);
@@ -132,6 +144,7 @@ function createGoogleCalendarEvent({
   subject,
   extensiveSubject,
   cardcomLink,
+  isEnergyCircle,
 }) {
   const title = `וובינר עם סוראן: ${subject}`;
   const startDateTime = new Date(`${date}T${hour}`)
@@ -149,6 +162,7 @@ function createGoogleCalendarEvent({
     subject,
     extensiveSubject,
     cardcomLink,
+    isEnergyCircle,
   });
 
   const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(
@@ -193,10 +207,15 @@ document.getElementById("gCalendarButton").addEventListener("click", () => {
   window.open(whatsappUrl, "_blank");
 });
 
-["date", "hour", "subject", "extensiveSubject", "cardcomLink"].forEach(
-  (name) => {
-    document
-      .querySelector(`#postForm [name="${name}"]`)
-      .addEventListener("blur", savePostForm);
-  }
-);
+[
+  { name: "date", eventType: "blur" },
+  { name: "hour", eventType: "blur" },
+  { name: "subject", eventType: "blur" },
+  { name: "extensiveSubject", eventType: "blur" },
+  { name: "cardcomLink", eventType: "blur" },
+  { name: "energyCircle", eventType: "change" },
+].forEach(({ name, eventType }) => {
+  document
+    .querySelector(`#postForm [name="${name}"]`)
+    .addEventListener(eventType, savePostForm);
+});

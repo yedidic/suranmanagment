@@ -9,7 +9,13 @@ function parseTextValue(template, data) {
     .replace(/{date}/g, getFormattedDate(data.date))
     .replace(/{hour}/g, data.hour)
     .replace(/{subject}/g, data.subject)
-    .replace(/{registrationLink}/g, data.registrationLink);
+    .replace(/{registrationLink}/g, data.registrationLink)
+    .replace(
+      /{energeticCircle}/g,
+      data.isEnergyCircle
+        ? `\nזהו מעגל בתחום "ההבעה הרגשית האנרגטית", והוא מומלץ לאלה שמרגישים מנוסים ומיומנים בתהליכי ההבעה הרגשית הרגילה וההתנהלות המדויקת ביומיום (הוראת העשור הראשון), וכן לכל מי שהשתתפ/ה במעגלי ההבעה הרגשית האנרגטית ו'יצירת יש מאין' הקודמים או מאזינ/ה לקורס בנושא זה במסגרת תוכנית המנויים באתר.\n`
+        : ""
+    );
 
   if (data.extraText && data.extraText.trim() !== "") {
     replacedText += "\n\n**\n\n" + data.extraText;
@@ -30,7 +36,7 @@ const texts = [
 
 מחר, יום {day} {date}, בשעה {hour}, נפגש ב"זום" לוובינר עם סוראן בנושא:
 {subject}
-
+{energeticCircle}
 להרשמה: {registrationLink}
 מייל לפניות ושאלות: info@suran.co.il
 ציור: DALL E AI`,
@@ -71,6 +77,7 @@ function savePostForm() {
   const hour = form.hour.value;
   const subject = form.subject.value;
   const registrationLink = form.registrationLink.value;
+  const isEnergyCircle = !!form.energyCircle.checked;
   const extraText = form.extraText.value;
 
   const secondPostData = {
@@ -79,6 +86,7 @@ function savePostForm() {
     hour: hour,
     subject: subject,
     registrationLink: registrationLink,
+    isEnergyCircle,
     extraText: extraText,
   };
 
@@ -116,6 +124,9 @@ function parseQueryParamsAndLocalData() {
     }
     if (data.registrationLink) {
       form.registrationLink.value = data.registrationLink;
+    }
+    if (data.isEnergyCircle) {
+      form.energyCircle.checked = true;
     }
     if (data.extraText) {
       form.extraText.value = data.extraText;
@@ -160,14 +171,15 @@ document.getElementById("whatsappBtn").addEventListener("click", () => {
 });
 
 [
-  "pocketPhrase",
-  "date",
-  "hour",
-  "subject",
-  "registrationLink",
-  "extraText",
-].forEach((name) => {
+  { name: "pocketPhrase", eventType: "blur" },
+  { name: "date", eventType: "blur" },
+  { name: "hour", eventType: "blur" },
+  { name: "subject", eventType: "blur" },
+  { name: "registrationLink", eventType: "blur" },
+  { name: "extraText", eventType: "blur" },
+  { name: "energyCircle", eventType: "change" },
+].forEach(({ name, eventType }) => {
   document
     .querySelector(`#postForm [name="${name}"]`)
-    .addEventListener("blur", savePostForm);
+    .addEventListener(eventType, savePostForm);
 });
