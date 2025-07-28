@@ -7,7 +7,7 @@ const POST_BASE = `וובינר עם סוראן
 מחיר הרשמה רגילה (אחרי 14:00 ביום האירוע): 60 ש"ח.
 
 לחצו כאן להרשמה לוובינר:
-{cardcomLink}{energeticCircle}
+{cardcomLink}{energeticCircle}{doctorDisclaimer}
 
 * לחווים קושי כלכלי בתקופה זו מוצע מחיר מוזל במסגרת ההרשמה המוקדמת.
 * ההרשמה היא להשתתפות במפגש החי, ואינה כוללת קבלה של הקלטת המפגש.`;
@@ -28,6 +28,12 @@ function parseTextValue(template, data) {
       /{energeticCircle}/g,
       data.isEnergyCircle
         ? `\n\nזהו מעגל בתחום "ההבעה הרגשית האנרגטית", והוא מומלץ לאלה שמרגישים מנוסים ומיומנים בתהליכי ההבעה הרגשית הרגילה וההתנהלות המדויקת ביומיום (הוראת העשור הראשון), וכן לכל מי שהשתתפ/ה במעגלי ההבעה הרגשית האנרגטית ו'יצירת יש מאין' הקודמים או מאזינ/ה לקורס בנושא זה במסגרת תוכנית המנויים באתר.`
+        : ""
+    )
+    .replace(
+      /{doctorDisclaimer}/g,
+      data.doctorDisclaimer
+        ? `\n\nהמידע שייאמר במעגל הינו בגדר כלי עזר בלבד ואינו מהווה המלצה ו/או תוכן לצורך קבלת החלטות כלשהן ו/או מחליף ייעוץ רופא ו/או גורם רפואי אחר ו/או ייעוץ מקצועי מכל סוג שהוא.`
         : ""
     );
 
@@ -79,6 +85,7 @@ function savePostForm() {
   const extensiveSubject = form.extensiveSubject.value || "";
   const cardcomLink = form.cardcomLink.value;
   const isEnergyCircle = !!form.energyCircle.checked;
+  const doctorDisclaimer = !!form.doctorDisclaimer.checked;
 
   const webinarData = {
     date: form.date.value,
@@ -87,6 +94,7 @@ function savePostForm() {
     extensiveSubject: extensiveSubject,
     cardcomLink: cardcomLink,
     isEnergyCircle,
+    doctorDisclaimer,
   };
 
   saveWebinarData(webinarData);
@@ -126,6 +134,9 @@ function parseQueryParamsAndLocalData() {
     }
     if (data.isEnergyCircle) {
       form.energyCircle.checked = true;
+    }
+    if (data.doctorDisclaimer) {
+      form.doctorDisclaimer.checked = true;
     }
 
     savePostForm({ target: form });
@@ -214,6 +225,7 @@ document.getElementById("gCalendarButton").addEventListener("click", () => {
   { name: "extensiveSubject", eventType: "blur" },
   { name: "cardcomLink", eventType: "blur" },
   { name: "energyCircle", eventType: "change" },
+  { name: "doctorDisclaimer", eventType: "change" },
 ].forEach(({ name, eventType }) => {
   document
     .querySelector(`#postForm [name="${name}"]`)
