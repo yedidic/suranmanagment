@@ -1,17 +1,24 @@
 // ==================== CONFIG ====================
 const API = 'https://script.google.com/macros/s/AKfycbzTLCLhgZ4Hnnums48mByAvESEjNtHeK6Aj7CbAJTcPvve9C2qJ122Cl6-cKC7Mzqw/exec';
+const ARBOX_SCHEDULE_API = 'https://apiappv2.arboxapp.com/api/v2/site/schedule/betweenDates?XDEBUG_SESSION_START=PHPSTORM';
 
 const HEB_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 const HEB_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
 const HOUR_START = 7;
 const HOUR_END = 22;
+const VALID_TABS = ['calendar', 'slots', 'tenants', 'types'];
+const VALID_VIEWS = ['month', 'week', 'day'];
 
 // ==================== STATE ====================
 let state = {
   slots: [], tenants: [], types: [],
   activeTab: 'calendar',
   calView: 'month',
-  calDate: new Date()
+  calDate: new Date(),
+  classes: [],
+  classesRangeKey: '',
+  classesLoading: false,
+  classesLoadingKey: ''
 };
 
 // ==================== API ====================
@@ -64,6 +71,15 @@ function typeChipsForTenant(typesStr) {
   }).filter(Boolean).join(' ');
 }
 function tenantColor(id) { return `tenant-c${Number(id) % 8}`; }
+function tenantSupportsType(tenantId, typeId) {
+  const tenant = state.tenants.find(t => Number(t.id) === Number(tenantId));
+  if (!tenant) return false;
+  const allowed = String(tenant.types || '')
+    .split(',')
+    .map(v => Number(String(v).trim()))
+    .filter(v => Number.isFinite(v) && v > 0);
+  return allowed.includes(Number(typeId));
+}
 
 // ==================== DATE UTILS ====================
 function fmtDate(d) {
@@ -84,6 +100,15 @@ function parseDMY(s) {
   const p = String(s).split('/');
   if (p.length !== 3) return null;
   return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
+}
+function parseYMD(s) {
+  if (!s) return null;
+  const p = String(s).split('-');
+  if (p.length !== 3) return null;
+  return new Date(Number(p[0]), Number(p[1])-1, Number(p[2]));
+}
+function isoDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 function asDateOnly(d) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -109,6 +134,32 @@ function weekStart(d) {
   const r = new Date(d);
   r.setDate(r.getDate() - r.getDay());
   return r;
+}
+function minutesToTime(m) {
+  return `${String(Math.floor(m / 60)).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`;
+}
+function overlaps(aStart, aEnd, bStart, bEnd) {
+  return aStart < bEnd && aEnd > bStart;
+}
+
+function syncUrlState() {
+  const u = new URL(window.location.href);
+  u.searchParams.set('tab', state.activeTab);
+  u.searchParams.set('view', state.calView);
+  u.searchParams.set('date', isoDate(state.calDate));
+  history.replaceState(null, '', `${u.pathname}?${u.searchParams.toString()}`);
+}
+
+function applyStateFromUrl() {
+  const p = new URLSearchParams(window.location.search);
+  const tab = p.get('tab');
+  const view = p.get('view');
+  const date = p.get('date');
+
+  if (VALID_TABS.includes(tab)) state.activeTab = tab;
+  if (VALID_VIEWS.includes(view)) state.calView = view;
+  const parsedDate = parseYMD(date);
+  if (parsedDate) state.calDate = asDateOnly(parsedDate);
 }
 
 // ==================== RENDER ALL ====================
@@ -181,23 +232,30 @@ function renderTypes() {
 }
 
 // ==================== TABS ====================
+function setActiveTab(name, syncUrl = true) {
+  const safeTab = VALID_TABS.includes(name) ? name : 'calendar';
+  state.activeTab = safeTab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === safeTab));
+  document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+  const panel = document.getElementById(`panel-${safeTab}`);
+  if (panel) panel.style.display = '';
+  if (safeTab === 'calendar') renderCalendar();
+  if (syncUrl) syncUrlState();
+}
+
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    const name = tab.dataset.tab;
-    state.activeTab = name;
-    document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-    document.getElementById(`panel-${name}`).style.display = '';
-    if (name === 'calendar') renderCalendar();
+    setActiveTab(tab.dataset.tab, true);
   });
 });
 
 // ==================== CALENDAR ====================
-function setCalView(v) {
-  state.calView = v;
-  document.querySelectorAll('[data-calview]').forEach(b => b.classList.toggle('active', b.dataset.calview === v));
+function setCalView(v, syncUrl = true) {
+  const safeView = VALID_VIEWS.includes(v) ? v : 'month';
+  state.calView = safeView;
+  document.querySelectorAll('[data-calview]').forEach(b => b.classList.toggle('active', b.dataset.calview === safeView));
   renderCalendar();
+  if (syncUrl) syncUrlState();
 }
 function calNav(dir) {
   const d = state.calDate;
@@ -205,8 +263,9 @@ function calNav(dir) {
   else if (state.calView === 'week') d.setDate(d.getDate() + dir * 7);
   else d.setDate(d.getDate() + dir);
   renderCalendar();
+  syncUrlState();
 }
-function calToday() { state.calDate = new Date(); renderCalendar(); }
+function calToday() { state.calDate = new Date(); renderCalendar(); syncUrlState(); }
 
 function slotsForDate(date) {
   const target = asDateOnly(date);
@@ -224,6 +283,195 @@ function slotsForDate(date) {
   }).sort((a, b) => timeToMin(a.start_time) - timeToMin(b.start_time));
 }
 
+function classesForDate(date) {
+  const target = asDateOnly(date);
+  return state.classes.filter(c => sameDay(c.startDate, target));
+}
+
+function dayDisplayEvents(date) {
+  const classEvents = classesForDate(date).map((ev, i) => ({
+    key: `class-${ev.id}-${i}`,
+    kind: 'class',
+    source: ev,
+    start: timeToMin(ev.start_time),
+    end: timeToMin(ev.end_time),
+    start_time: ev.start_time,
+    end_time: ev.end_time,
+    title: ev.title,
+    color: ev.color
+  }));
+
+  const slotEvents = slotsForDate(date).map((ev, i) => {
+    const st = timeToMin(ev.start_time);
+    const et = ev.end_time ? timeToMin(ev.end_time) : st + 60;
+    return {
+      key: `slot-${ev.id}-${i}-${ev.start_time || ''}`,
+      kind: 'slot',
+      source: ev,
+      start: st,
+      end: et > st ? et : st + 60,
+      start_time: ev.start_time,
+      end_time: ev.end_time || minutesToTime(st + 60),
+      title: ev.client_name || typeName(ev.type_id),
+      color: ''
+    };
+  });
+
+  return [...classEvents, ...slotEvents].sort((a, b) => (a.start - b.start) || (a.end - b.end));
+}
+
+function withOverlapColumns(events) {
+  if (!events.length) return [];
+  const groups = [];
+  let current = [];
+  let currentMaxEnd = -1;
+
+  events.forEach(ev => {
+    if (!current.length || ev.start < currentMaxEnd) {
+      current.push(ev);
+      currentMaxEnd = Math.max(currentMaxEnd, ev.end);
+      return;
+    }
+    groups.push(current);
+    current = [ev];
+    currentMaxEnd = ev.end;
+  });
+  if (current.length) groups.push(current);
+
+  const laidOut = [];
+  groups.forEach(group => {
+    const colsEnd = [];
+    const colByKey = {};
+    group.forEach(ev => {
+      let col = colsEnd.findIndex(endMin => endMin <= ev.start);
+      if (col === -1) {
+        col = colsEnd.length;
+        colsEnd.push(ev.end);
+      } else {
+        colsEnd[col] = ev.end;
+      }
+      colByKey[ev.key] = col;
+    });
+    const cols = Math.max(colsEnd.length, 1);
+    group.forEach(ev => laidOut.push({ ...ev, col: colByKey[ev.key], cols }));
+  });
+  return laidOut;
+}
+
+function getVisibleRange() {
+  const d = state.calDate;
+  if (state.calView === 'month') {
+    const from = new Date(d.getFullYear(), d.getMonth(), 1);
+    const to = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    return { from, to, key: `${isoDate(from)}|${isoDate(to)}` };
+  }
+  if (state.calView === 'week') {
+    const from = weekStart(d);
+    const to = new Date(from);
+    to.setDate(to.getDate() + 6);
+    return { from: asDateOnly(from), to: asDateOnly(to), key: `${isoDate(from)}|${isoDate(to)}` };
+  }
+  const single = asDateOnly(d);
+  return { from: single, to: single, key: `${isoDate(single)}|${isoDate(single)}` };
+}
+
+function normalizeArboxClass(item) {
+  const categoryNameLc = String(item.box_categories?.name || '').toLowerCase();
+  const seriesNameLc = String(item.series?.series_name || '').toLowerCase();
+  const hasLiveLink = !!String(item.live_link || '').trim();
+  const isOnlineByName = categoryNameLc.includes('אונליין') || categoryNameLc.includes('online') || seriesNameLc.includes('אונליין') || seriesNameLc.includes('online');
+  if (hasLiveLink || isOnlineByName) return null;
+
+  const dateVal = item.date || '';
+  const startTime = String(item.time || '').slice(0, 5);
+  const endTimeRaw = String(item.end_time || '').slice(0, 5);
+  if (!dateVal || !startTime) return null;
+  const d = parseYMD(dateVal);
+  if (!d) return null;
+  const startMin = timeToMin(startTime);
+  const endMin = endTimeRaw ? timeToMin(endTimeRaw) : (startMin + 60);
+  const safeEnd = endMin > startMin ? endMin : startMin + 60;
+
+  const startDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(startMin / 60), startMin % 60);
+  const endDate = new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(safeEnd / 60), safeEnd % 60);
+  const title = item.box_categories?.name || item.series?.series_name || item.coach?.full_name || 'שיעור';
+  const color = item.box_categories?.category_color || '#c0dcfe';
+  const coachName = item.coach?.full_name || '';
+  const categoryName = item.box_categories?.name || '';
+  const locationName = item.locations_box?.location || '';
+  const registered = Number(item.registered || 0);
+  const free = Number(item.free || 0);
+  const maxUsers = Number(item.max_users || 0);
+  const bookingOption = item.booking_option || '';
+  const ref = `${item.id}|${dateVal}|${startTime}`;
+
+  return {
+    id: item.id,
+    ref,
+    date: fmtDate(startDate),
+    start_time: minutesToTime(startMin),
+    end_time: minutesToTime(safeEnd),
+    startDate,
+    endDate,
+    title,
+    color,
+    coachName,
+    categoryName,
+    locationName,
+    registered,
+    free,
+    maxUsers,
+    bookingOption
+  };
+}
+
+async function loadArboxClasses(range) {
+  state.classesLoading = true;
+  state.classesLoadingKey = range.key;
+  state.classes = [];
+  renderCalendar();
+
+  try {
+    const res = await fetch(ARBOX_SCHEDULE_API, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json, text/plain, */*',
+        'content-type': 'application/json',
+        'boxfk': '17885',
+        'identifier': 'yogahouse',
+        'lang': 'en',
+        'newsite': '1',
+        'referername': 'plugin',
+        'whitelabel': 'Arbox'
+      },
+      body: JSON.stringify({
+        from: isoDate(range.from),
+        to: isoDate(range.to),
+        locations_box_id: 14927
+      })
+    });
+    const payload = await res.json();
+    const items = Array.isArray(payload?.data) ? payload.data : [];
+    state.classes = items.map(normalizeArboxClass).filter(Boolean);
+    state.classesRangeKey = range.key;
+  } catch (e) {
+    state.classes = [];
+    toast('שגיאה בטעינת שיעורים', 'error');
+  } finally {
+    state.classesLoading = false;
+    state.classesLoadingKey = '';
+    renderCalendar();
+  }
+}
+
+function ensureVisibleClassesLoaded() {
+  const range = getVisibleRange();
+  if (state.classesRangeKey === range.key) return range;
+  if (state.classesLoading && state.classesLoadingKey === range.key) return range;
+  loadArboxClasses(range);
+  return range;
+}
+
 function renderCalendar() {
   const container = document.getElementById('cal-container');
   const titleEl = document.getElementById('cal-title');
@@ -232,11 +480,20 @@ function renderCalendar() {
   else renderDayView(container, titleEl);
 }
 
+function calendarLoadingHtml() {
+  return '<div class="loading cal-loading"><div class="spinner"></div>טוען שיעורים...</div>';
+}
+
 // ---- MONTH VIEW ----
 function renderMonthView(container, titleEl) {
   const d = state.calDate;
   const year = d.getFullYear(), month = d.getMonth();
   titleEl.textContent = `${HEB_MONTHS[month]} ${year}`;
+  const visibleRange = ensureVisibleClassesLoaded();
+  if (state.classesLoading && state.classesLoadingKey === visibleRange.key) {
+    container.innerHTML = calendarLoadingHtml();
+    return;
+  }
 
   const firstDay = new Date(year, month, 1);
   const startOffset = firstDay.getDay();
@@ -255,13 +512,18 @@ function renderMonthView(container, titleEl) {
     const cellDate = new Date(year, month, day);
     const isToday = sameDay(cellDate, today);
     const events = slotsForDate(cellDate);
+    const classEvents = classesForDate(cellDate);
     html += `<div class="day-cell${isToday?' today':''}" onclick="calDayClick('${fmtDate(cellDate)}')">`;
     html += `<div class="day-num">${day}</div>`;
+    classEvents.slice(0, 2).forEach(ev => {
+      html += `<div class="cal-event cal-class-event" style="background:${ev.color}" title="${ev.title} (Arbox)" onclick="event.stopPropagation();openArboxClassModal('${ev.ref}')">${ev.start_time} ${ev.title} (Arbox)</div>`;
+    });
     events.slice(0, 3).forEach(ev => {
       const t = ev.start_time || '';
       html += `<div class="cal-event ${tenantColor(ev.tenant_id)}" onclick="event.stopPropagation();openSlotModal(${ev.id})">${t} ${tenantName(ev.tenant_id)}</div>`;
     });
-    if (events.length > 3) html += `<div style="font-size:0.68rem;color:var(--text-secondary);padding:0 6px">+${events.length-3} עוד</div>`;
+    const totalMore = Math.max(classEvents.length - 2, 0) + Math.max(events.length - 3, 0);
+    if (totalMore > 0) html += `<div style="font-size:0.68rem;color:var(--text-secondary);padding:0 6px">+${totalMore} עוד</div>`;
     html += '</div>';
   }
 
@@ -281,6 +543,11 @@ function renderWeekView(container, titleEl) {
   const days = [];
   for (let i = 0; i < 7; i++) { const dd = new Date(ws); dd.setDate(dd.getDate()+i); days.push(dd); }
   titleEl.textContent = `${fmtDate(days[0])} — ${fmtDate(days[6])}`;
+  const visibleRange = ensureVisibleClassesLoaded();
+  if (state.classesLoading && state.classesLoadingKey === visibleRange.key) {
+    container.innerHTML = calendarLoadingHtml();
+    return;
+  }
   renderTimeGrid(container, days);
 }
 
@@ -288,6 +555,11 @@ function renderWeekView(container, titleEl) {
 function renderDayView(container, titleEl) {
   const d = state.calDate;
   titleEl.textContent = `יום ${HEB_DAYS[d.getDay()]} — ${fmtDate(d)}`;
+  const visibleRange = ensureVisibleClassesLoaded();
+  if (state.classesLoading && state.classesLoadingKey === visibleRange.key) {
+    container.innerHTML = calendarLoadingHtml();
+    return;
+  }
   renderTimeGrid(container, [d]);
 }
 
@@ -298,6 +570,10 @@ function renderTimeGrid(container, days) {
   const hours = [];
   for (let h = HOUR_START; h <= HOUR_END; h++) hours.push(h);
   const cellH = 52;
+  const dayLayouts = {};
+  days.forEach(d => {
+    dayLayouts[fmtDate(d)] = withOverlapColumns(dayDisplayEvents(d));
+  });
 
   let html = '<div class="cal-time-grid">';
 
@@ -320,17 +596,23 @@ function renderTimeGrid(container, days) {
       html += `<div class="tg-cell${isToday?' today-col':''}" onclick="calCellClick('${dateStr}','${String(h).padStart(2,'0')}:00')">`;
 
       // Events starting in this hour
-      slotsForDate(d).filter(ev => {
-        const st = timeToMin(ev.start_time);
-        return Math.floor(st / 60) === h;
-      }).forEach(ev => {
-        const st = timeToMin(ev.start_time);
-        const et = ev.end_time ? timeToMin(ev.end_time) : st + 60;
+      (dayLayouts[dateStr] || []).filter(ev => Math.floor(ev.start / 60) === h).forEach(ev => {
+        const st = ev.start;
+        const et = ev.end;
         const topOff = (st % 60) / 60 * cellH;
         const height = Math.max(((et - st) / 60) * cellH, 22);
-        html += `<div class="tg-event ${tenantColor(ev.tenant_id)}" style="top:${topOff}px;height:${height}px" onclick="event.stopPropagation();openSlotModal(${ev.id})">`;
-        html += `<span class="ev-time">${ev.start_time}–${ev.end_time||''}</span>`;
-        html += `<span class="ev-name"> ${ev.client_name || typeName(ev.type_id)}</span>`;
+        const widthPct = 100 / ev.cols;
+        const leftPct = ev.col * widthPct;
+        const baseStyle = `top:${topOff}px;height:${height}px;right:auto;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px)`;
+        if (ev.kind === 'class') {
+          html += `<div class="tg-event tg-class-event" style="${baseStyle};background:${ev.color}" title="${ev.title} (Arbox)" onclick="event.stopPropagation();openArboxClassModal('${ev.ref}')">`;
+          html += `<span class="ev-time">${ev.start_time}–${ev.end_time}</span>`;
+          html += `<span class="ev-name"> ${ev.title} (Arbox)</span>`;
+        } else {
+          html += `<div class="tg-event ${tenantColor(ev.source.tenant_id)}" style="${baseStyle}" onclick="event.stopPropagation();openSlotModal(${ev.source.id})">`;
+          html += `<span class="ev-time">${ev.source.start_time}–${ev.source.end_time||''}</span>`;
+          html += `<span class="ev-name"> ${ev.title}</span>`;
+        }
         html += '</div>';
       });
 
@@ -357,6 +639,45 @@ function openModal(html) {
 }
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function openArboxClassModal(ref) {
+  const cls = state.classes.find(c => c.ref === ref);
+  if (!cls) {
+    toast('פרטי השיעור לא נמצאו', 'error');
+    return;
+  }
+  openModal(`
+    <h3>פרטי שיעור (Arbox)</h3>
+    <div class="form-group"><label>שיעור</label><div>${cls.categoryName || cls.title}</div></div>
+    <div class="form-group"><label>תאריך</label><div>${cls.date}</div></div>
+    <div class="form-group"><label>שעה</label><div>${cls.start_time} - ${cls.end_time}</div></div>
+    <div class="form-group"><label>מדריך/ה</label><div>${cls.coachName || '—'}</div></div>
+    <div class="form-group"><label>מיקום</label><div>${cls.locationName || '—'}</div></div>
+    <div class="form-group"><label>תפוסה</label><div>${cls.registered}/${cls.maxUsers || (cls.registered + cls.free) || '—'}</div></div>
+    <div class="form-group"><label>סטטוס</label><div>${cls.bookingOption || '—'}</div></div>
+    <p style="margin-top:10px;color:var(--text-secondary);font-size:0.85rem">אירוע מתצוגת Arbox בלבד, לא ניתן לעריכה כאן.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">סגור</button>
+    </div>
+  `);
+}
+
+function setModalSaving(isSaving, loadingText = 'שומר...') {
+  const actions = document.querySelector('.modal-actions');
+  if (!actions) return;
+  const primary = actions.querySelector('.btn-primary');
+  const buttons = actions.querySelectorAll('button');
+  buttons.forEach(btn => { btn.disabled = !!isSaving; });
+  if (!primary) return;
+
+  if (isSaving) {
+    if (!primary.dataset.originalHtml) primary.dataset.originalHtml = primary.innerHTML;
+    primary.innerHTML = `<span class="btn-spinner"></span>${loadingText}`;
+  } else if (primary.dataset.originalHtml) {
+    primary.innerHTML = primary.dataset.originalHtml;
+    delete primary.dataset.originalHtml;
+  }
 }
 
 // -- SLOT MODAL --
@@ -429,6 +750,22 @@ function toggleRecurringTill() {
   wrap.style.display = recurring ? 'block' : 'none';
 }
 
+function slotDatesToCheck(data) {
+  const first = parseDMY(data.date);
+  if (!first) return [];
+  const dates = [asDateOnly(first)];
+  if (!data.is_recurring) return dates;
+  const till = parseDMY(data.recurring_till);
+  if (!till) return dates;
+  let cursor = new Date(first);
+  cursor.setDate(cursor.getDate() + 7);
+  while (asDateOnly(cursor) <= asDateOnly(till)) {
+    dates.push(asDateOnly(cursor));
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  return dates;
+}
+
 async function saveSlot(editId) {
   const recurring = document.getElementById('f-recurring')?.checked;
   const recurringTillIso = document.getElementById('f-recurring-till')?.value || '';
@@ -445,21 +782,56 @@ async function saveSlot(editId) {
   if (!data.date || !data.start_time || !data.tenant_id || !data.type_id) {
     toast('נא למלא תאריך, שעת התחלה, מטפל וסוג','error'); return;
   }
+  if (data.end_time && timeToMin(data.start_time) >= timeToMin(data.end_time)) {
+    toast('שעת ההתחלה חייבת להיות מוקדמת משעת הסיום','error'); return;
+  }
+  if (!tenantSupportsType(data.tenant_id, data.type_id)) {
+    toast('סוג הטיפול לא תואם לסוגי הטיפול של המטפל','error'); return;
+  }
   if (data.is_recurring && !data.recurring_till) {
     toast('נא לבחור תאריך סיום לחזרתיות','error'); return;
   }
   if (data.is_recurring) {
     const startDate = parseDMY(data.date);
     const tillDate = parseDMY(data.recurring_till);
-    if (!startDate || !tillDate || asDateOnly(tillDate) < asDateOnly(startDate)) {
-      toast('תאריך "חוזר עד" חייב להיות מאוחר או שווה לתאריך התור','error'); return;
+    if (!startDate || !tillDate || asDateOnly(tillDate) <= asDateOnly(startDate)) {
+      toast('תאריך "חוזר עד" חייב להיות מאוחר מתאריך התור','error'); return;
     }
   }
+
+  const newStart = timeToMin(data.start_time);
+  const newEnd = data.end_time ? timeToMin(data.end_time) : newStart + 60;
+  const dates = slotDatesToCheck(data);
+  let overlapsClass = false;
+  let overlapsSlot = false;
+
+  dates.forEach(dt => {
+    if (overlapsClass || overlapsSlot) return;
+    overlapsClass = classesForDate(dt).some(c =>
+      overlaps(newStart, newEnd, timeToMin(c.start_time), timeToMin(c.end_time))
+    );
+    overlapsSlot = slotsForDate(dt)
+      .filter(s => Number(s.id) !== Number(editId))
+      .some(s => overlaps(
+        newStart,
+        newEnd,
+        timeToMin(s.start_time),
+        s.end_time ? timeToMin(s.end_time) : timeToMin(s.start_time) + 60
+      ));
+  });
+
+  if (overlapsClass && !window.confirm('האם אתה בטוח שברצונך לקבוע תור בזמן של שיעור?')) return;
+  if (overlapsSlot && !window.confirm('האם אתה בטוח שברצונך לקבוע תור בזמן של תור אחר?')) return;
+
+  setModalSaving(true);
   try {
     if (editId) { await apiPost('update','slots',data,editId); toast('התור עודכן','success'); }
     else { await apiPost('add','slots',data); toast('התור נוסף','success'); }
     closeModal(); await loadAll();
-  } catch(e){}
+  } catch(e) {
+  } finally {
+    setModalSaving(false);
+  }
 }
 
 // -- TENANT MODAL (FIXED CHECKBOXES) --
@@ -504,11 +876,15 @@ async function saveTenant(editId) {
     types
   };
   if (!data.name) { toast('נא להזין שם','error'); return; }
+  setModalSaving(true);
   try {
     if (editId) { await apiPost('update','tenants',data,editId); toast('המטפל עודכן','success'); }
     else { await apiPost('add','tenants',data); toast('המטפל נוסף','success'); }
     closeModal(); await loadAll();
-  } catch(e){}
+  } catch(e) {
+  } finally {
+    setModalSaving(false);
+  }
 }
 
 // -- TYPE MODAL --
@@ -540,11 +916,15 @@ async function saveType(editId) {
     class_among_can: document.getElementById('f-class').checked
   };
   if (!data.name) { toast('נא להזין שם','error'); return; }
+  setModalSaving(true);
   try {
     if (editId) { await apiPost('update','types',data,editId); toast('סוג הטיפול עודכן','success'); }
     else { await apiPost('add','types',data); toast('סוג הטיפול נוסף','success'); }
     closeModal(); await loadAll();
-  } catch(e){}
+  } catch(e) {
+  } finally {
+    setModalSaving(false);
+  }
 }
 
 // ==================== DELETE ====================
@@ -577,4 +957,8 @@ function toast(msg, type='') {
 }
 
 // ==================== INIT ====================
+applyStateFromUrl();
+setCalView(state.calView, false);
+setActiveTab(state.activeTab, false);
+syncUrlState();
 loadAll();
