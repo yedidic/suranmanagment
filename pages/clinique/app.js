@@ -12,6 +12,7 @@ const VALID_VIEWS = ['month', 'week', 'day'];
 // ==================== STATE ====================
 let state = {
   slots: [], tenants: [], types: [],
+  slotsLoading: true,
   activeTab: 'calendar',
   calView: 'month',
   calDate: new Date(),
@@ -20,16 +21,34 @@ let state = {
   classesLoading: false,
   classesLoadingKey: ''
 };
+let globalLoadingCount = 0;
+
+function renderGlobalLoading() {
+  const el = document.getElementById('global-loading-overlay');
+  if (!el) return;
+  el.classList.toggle('open', globalLoadingCount > 0);
+}
+function beginGlobalLoading() {
+  globalLoadingCount += 1;
+  renderGlobalLoading();
+}
+function endGlobalLoading() {
+  globalLoadingCount = Math.max(0, globalLoadingCount - 1);
+  renderGlobalLoading();
+}
 
 // ==================== API ====================
 async function apiGet(entity) {
+  beginGlobalLoading();
   try {
     const res = await fetch(`${API}?entity=${entity}`);
     return await res.json() || [];
   } catch (e) { toast('שגיאה בטעינת נתונים', 'error'); return []; }
+  finally { endGlobalLoading(); }
 }
 
 async function apiPost(action, entity, data, id) {
+  beginGlobalLoading();
   try {
     const body = { action, entity, data };
     if (id) body.id = Number(id);
@@ -42,15 +61,19 @@ async function apiPost(action, entity, data, id) {
     if (!result.success) throw new Error(result.error || 'שגיאה');
     return result.result;
   } catch (e) { toast(e.message || 'שגיאה', 'error'); throw e; }
+  finally { endGlobalLoading(); }
 }
 
 async function loadAll() {
+  state.slotsLoading = true;
+  renderCalendar();
   const [slots, tenants, types] = await Promise.all([
     apiGet('slots'), apiGet('tenants'), apiGet('types')
   ]);
   state.slots = Array.isArray(slots) ? slots : [];
   state.tenants = Array.isArray(tenants) ? tenants : [];
   state.types = Array.isArray(types) ? types : [];
+  state.slotsLoading = false;
   renderAll();
 }
 
@@ -426,6 +449,7 @@ function normalizeArboxClass(item) {
 }
 
 async function loadArboxClasses(range) {
+  beginGlobalLoading();
   state.classesLoading = true;
   state.classesLoadingKey = range.key;
   state.classes = [];
@@ -460,6 +484,7 @@ async function loadArboxClasses(range) {
   } finally {
     state.classesLoading = false;
     state.classesLoadingKey = '';
+    endGlobalLoading();
     renderCalendar();
   }
 }
@@ -481,7 +506,7 @@ function renderCalendar() {
 }
 
 function calendarLoadingHtml() {
-  return '<div class="loading cal-loading"><div class="spinner"></div>טוען שיעורים...</div>';
+  return '<div class="loading cal-loading"><div class="spinner"></div>טוען יומן...</div>';
 }
 
 // ---- MONTH VIEW ----
@@ -490,7 +515,8 @@ function renderMonthView(container, titleEl) {
   const year = d.getFullYear(), month = d.getMonth();
   titleEl.textContent = `${HEB_MONTHS[month]} ${year}`;
   const visibleRange = ensureVisibleClassesLoaded();
-  if (state.classesLoading && state.classesLoadingKey === visibleRange.key) {
+  const rangeLoading = state.classesLoading && state.classesLoadingKey === visibleRange.key;
+  if (state.slotsLoading || rangeLoading) {
     container.innerHTML = calendarLoadingHtml();
     return;
   }
@@ -544,7 +570,8 @@ function renderWeekView(container, titleEl) {
   for (let i = 0; i < 7; i++) { const dd = new Date(ws); dd.setDate(dd.getDate()+i); days.push(dd); }
   titleEl.textContent = `${fmtDate(days[0])} — ${fmtDate(days[6])}`;
   const visibleRange = ensureVisibleClassesLoaded();
-  if (state.classesLoading && state.classesLoadingKey === visibleRange.key) {
+  const rangeLoading = state.classesLoading && state.classesLoadingKey === visibleRange.key;
+  if (state.slotsLoading || rangeLoading) {
     container.innerHTML = calendarLoadingHtml();
     return;
   }
@@ -556,7 +583,8 @@ function renderDayView(container, titleEl) {
   const d = state.calDate;
   titleEl.textContent = `יום ${HEB_DAYS[d.getDay()]} — ${fmtDate(d)}`;
   const visibleRange = ensureVisibleClassesLoaded();
-  if (state.classesLoading && state.classesLoadingKey === visibleRange.key) {
+  const rangeLoading = state.classesLoading && state.classesLoadingKey === visibleRange.key;
+  if (state.slotsLoading || rangeLoading) {
     container.innerHTML = calendarLoadingHtml();
     return;
   }
@@ -716,7 +744,7 @@ function openSlotModal(editId, prefillDate, prefillTime) {
     </div>
     <div class="form-group">
       <label>מטפל</label>
-      <select id="f-tenant"><option value="">בחר...</option>${tenantOpts}</select>
+      <select id="f-tenant" onchange="onSlotTenantChange()"><option value="">בחר...</option>${tenantOpts}</select>
     </div>
     <div class="form-group">
       <label>סוג טיפול</label>
@@ -741,6 +769,20 @@ function openSlotModal(editId, prefillDate, prefillTime) {
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
     </div>
   `);
+}
+
+function onSlotTenantChange() {
+  const tenantId = Number(document.getElementById('f-tenant')?.value || 0);
+  const typeSelect = document.getElementById('f-type');
+  if (!tenantId || !typeSelect) return;
+  const tenant = state.tenants.find(t => Number(t.id) === tenantId);
+  if (!tenant) return;
+  const firstTypeId = String(tenant.types || '')
+    .split(',')
+    .map(v => Number(String(v).trim()))
+    .find(v => Number.isFinite(v) && v > 0);
+  if (!firstTypeId) return;
+  typeSelect.value = String(firstTypeId);
 }
 
 function toggleRecurringTill() {
