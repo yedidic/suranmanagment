@@ -60,6 +60,7 @@
     font-size: 1.3rem;
     color: var(--accent);
     letter-spacing: -0.02em;
+    white-space: nowrap;
   }
   .topbar .dot {
     display: inline-block;
@@ -69,10 +70,7 @@
     margin-inline-start: 8px;
     animation: pulse 2s infinite;
   }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
   /* ---- TABS ---- */
   .tabs {
@@ -93,32 +91,26 @@
     cursor: pointer;
     border-radius: var(--radius-sm);
     transition: var(--transition);
+    white-space: nowrap;
   }
   .tab:hover { background: var(--surface); color: var(--text); }
-  .tab.active {
-    background: var(--surface);
-    color: var(--accent);
-    box-shadow: var(--shadow-sm);
-  }
+  .tab.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-sm); }
 
   /* ---- LAYOUT ---- */
-  .container {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 24px 16px 80px;
-  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 80px; }
 
   .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .section-header h2 {
     font-family: 'Rubik', sans-serif;
     font-weight: 600;
     font-size: 1.1rem;
-    color: var(--text);
   }
   .count-badge {
     background: var(--accent-bg);
@@ -143,25 +135,19 @@
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
+    white-space: nowrap;
   }
-  .btn-primary {
-    background: var(--accent);
-    color: white;
-  }
+  .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-secondary);
-    padding: 6px 10px;
-  }
+  .btn-ghost { background: transparent; color: var(--text-secondary); padding: 6px 10px; }
   .btn-ghost:hover { background: var(--accent-bg); color: var(--accent); }
-  .btn-danger {
-    background: transparent;
-    color: var(--danger);
-    padding: 6px 10px;
-  }
+  .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--border); padding: 6px 14px; }
+  .btn-outline:hover { background: var(--accent-bg); border-color: var(--accent); }
+  .btn-outline.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--danger); padding: 6px 10px; }
   .btn-danger:hover { background: var(--danger-bg); }
   .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+  .btn-icon { padding: 6px 8px; font-size: 1rem; }
 
   /* ---- TABLE ---- */
   .table-wrap {
@@ -171,10 +157,7 @@
     overflow: hidden;
     border: 1px solid var(--border);
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  table { width: 100%; border-collapse: collapse; }
   thead th {
     background: var(--surface-hover);
     padding: 12px 16px;
@@ -205,14 +188,10 @@
     font-weight: 500;
     background: var(--accent-bg);
     color: var(--accent);
+    margin: 1px 2px;
   }
-  .bool-yes {
-    color: var(--success);
-    font-weight: 600;
-  }
-  .bool-no {
-    color: var(--text-secondary);
-  }
+  .bool-yes { color: var(--success); font-weight: 600; }
+  .bool-no { color: var(--text-secondary); }
 
   /* ---- MODAL ---- */
   .modal-overlay {
@@ -247,20 +226,21 @@
     font-weight: 600;
     font-size: 1.05rem;
     margin-bottom: 20px;
-    color: var(--text);
   }
 
-  .form-group {
-    margin-bottom: 16px;
-  }
-  .form-group label {
+  .form-group { margin-bottom: 16px; }
+  .form-group > label {
     display: block;
     font-size: 0.8rem;
     font-weight: 500;
     color: var(--text-secondary);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
-  .form-group input, .form-group select {
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="date"],
+  .form-group input[type="time"],
+  .form-group select {
     width: 100%;
     padding: 10px 14px;
     border: 1px solid var(--border);
@@ -276,6 +256,48 @@
     outline: none;
     border-color: var(--border-focus);
     box-shadow: 0 0 0 3px rgba(139,115,85,0.1);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ---- CHECKBOX LIST (FIXED) ---- */
+  .checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: var(--surface-hover);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .checkbox-item:last-child { border-bottom: none; }
+  .checkbox-item:hover { background: var(--accent-bg); }
+  .checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+    flex-shrink: 0;
+    order: -1;
+  }
+  .checkbox-item .cb-label {
+    flex: 1;
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.4;
   }
 
   .modal-actions {
@@ -312,7 +334,7 @@
   @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
 
-  /* ---- LOADING ---- */
+  /* ---- LOADING / EMPTY ---- */
   .loading {
     display: flex;
     align-items: center;
@@ -330,30 +352,182 @@
     animation: spin 0.6s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; padding: 48px 24px; color: var(--text-secondary); font-size: 0.9rem; }
+  .empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.5; }
 
-  /* ---- EMPTY STATE ---- */
-  .empty {
+  /* ==== CALENDAR ==== */
+  .cal-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .cal-title {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    min-width: 140px;
     text-align: center;
-    padding: 48px 24px;
+  }
+  .cal-views {
+    display: flex;
+    gap: 4px;
+    margin-inline-start: auto;
+  }
+
+  /* Month grid */
+  .cal-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .cal-month-grid .day-header {
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    text-transform: uppercase;
+    background: var(--surface-hover);
+    border-bottom: 1px solid var(--border);
   }
-  .empty-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
-    opacity: 0.5;
+  .cal-month-grid .day-cell {
+    min-height: 90px;
+    padding: 4px;
+    border-bottom: 1px solid var(--border);
+    border-inline-start: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
   }
+  .cal-month-grid .day-cell:nth-child(7n+2) { border-inline-start: none; }
+  .cal-month-grid .day-cell:hover { background: var(--surface-hover); }
+  .cal-month-grid .day-cell.other-month { opacity: 0.35; }
+  .cal-month-grid .day-cell.today { background: var(--accent-bg); }
+  .day-num {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    display: inline-block;
+  }
+  .day-cell.today .day-num {
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .cal-event {
+    display: block;
+    padding: 2px 6px;
+    margin: 1px 2px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .cal-event:hover { filter: brightness(0.92); }
+
+  /* Week / Day time grid */
+  .cal-time-grid {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    box-shadow: var(--shadow-sm);
+  }
+  .tg-header {
+    display: grid;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-hover);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .tg-header-cell {
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-inline-start: 1px solid var(--border);
+  }
+  .tg-header-cell:first-child { border-inline-start: none; }
+  .tg-header-cell.today-col { color: var(--accent); background: var(--accent-bg); }
+
+  .tg-body { display: grid; }
+  .tg-time-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .tg-cell {
+    border-bottom: 1px solid var(--border);
+    border-inline-start: 1px solid var(--border);
+    min-height: 52px;
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .tg-cell:hover { background: var(--surface-hover); }
+  .tg-cell.today-col { background: rgba(139,115,85,0.03); }
+
+  .tg-event {
+    position: absolute;
+    right: 2px;
+    left: 2px;
+    border-radius: 5px;
+    padding: 3px 7px;
+    font-size: 0.73rem;
+    font-weight: 500;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 2;
+    line-height: 1.3;
+    transition: var(--transition);
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .tg-event:hover { filter: brightness(0.9); box-shadow: var(--shadow-md); }
+  .tg-event .ev-time { font-weight: 600; display: block; }
+  .tg-event .ev-name { opacity: 0.8; }
+
+  /* Tenant color palette */
+  .tenant-c0 { background: #e8d5c4; color: #5a3e2b; }
+  .tenant-c1 { background: #c4d9e8; color: #2b4a5a; }
+  .tenant-c2 { background: #d4e8c4; color: #3a5a2b; }
+  .tenant-c3 { background: #e8c4d4; color: #5a2b3e; }
+  .tenant-c4 { background: #d4c4e8; color: #3e2b5a; }
+  .tenant-c5 { background: #e8e4c4; color: #5a562b; }
+  .tenant-c6 { background: #c4e8e4; color: #2b5a56; }
+  .tenant-c7 { background: #e8cec4; color: #5a392b; }
 
   /* ---- RESPONSIVE ---- */
   @media (max-width: 640px) {
-    .topbar { padding: 0 12px; }
-    .topbar h1 { font-size: 1.1rem; }
-    .container { padding: 16px 8px 80px; }
-    .tab { padding: 8px 14px; font-size: 0.8rem; }
+    .topbar { padding: 8px 10px; flex-wrap: wrap; height: auto; gap: 6px; }
+    .topbar h1 { font-size: 1.05rem; }
+    .container { padding: 12px 6px 80px; }
+    .tab { padding: 7px 12px; font-size: 0.78rem; }
     .modal { padding: 20px; width: 95%; }
-    .table-wrap { font-size: 0.82rem; }
-    thead th, tbody td { padding: 10px 10px; }
-    .actions-cell { display: flex; gap: 2px; }
+    thead th, tbody td { padding: 10px 8px; font-size: 0.8rem; }
+    .cal-month-grid .day-cell { min-height: 60px; }
+    .form-row { grid-template-columns: 1fr; }
+    .cal-views { margin-inline-start: 0; }
   }
 </style>
 </head>
@@ -363,41 +537,50 @@
 <div class="topbar">
   <h1>ניהול קליניקה <span class="dot"></span></h1>
   <div class="tabs">
-    <button class="tab active" data-tab="slots">תורים</button>
+    <button class="tab active" data-tab="calendar">יומן</button>
+    <button class="tab" data-tab="slots">תורים</button>
     <button class="tab" data-tab="tenants">מטפלים</button>
     <button class="tab" data-tab="types">סוגי טיפול</button>
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="container">
 
-  <!-- SLOTS -->
-  <div id="panel-slots" class="panel">
+  <!-- ====== CALENDAR ====== -->
+  <div id="panel-calendar" class="panel">
+    <div class="cal-toolbar">
+      <button class="btn btn-ghost btn-icon" onclick="calNav(-1)">→</button>
+      <div class="cal-title" id="cal-title"></div>
+      <button class="btn btn-ghost btn-icon" onclick="calNav(1)">←</button>
+      <button class="btn btn-outline btn-sm" onclick="calToday()">היום</button>
+      <div class="cal-views">
+        <button class="btn btn-outline btn-sm active" data-calview="month" onclick="setCalView('month')">חודש</button>
+        <button class="btn btn-outline btn-sm" data-calview="week" onclick="setCalView('week')">שבוע</button>
+        <button class="btn btn-outline btn-sm" data-calview="day" onclick="setCalView('day')">יום</button>
+      </div>
+    </div>
+    <div id="cal-container"></div>
+  </div>
+
+  <!-- ====== SLOTS TABLE ====== -->
+  <div id="panel-slots" class="panel" style="display:none">
     <div class="section-header">
       <h2>תורים <span class="count-badge" id="slots-count">0</span></h2>
       <button class="btn btn-primary" onclick="openSlotModal()">＋ תור חדש</button>
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>תאריך</th>
-            <th>שעה</th>
-            <th>מטפל</th>
-            <th>סוג</th>
-            <th>לקוח</th>
-            <th></th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>תאריך</th><th>התחלה</th><th>סיום</th><th>מטפל</th><th>סוג</th><th>לקוח</th><th></th>
+        </tr></thead>
         <tbody id="slots-body">
-          <tr><td colspan="6"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
+          <tr><td colspan="7"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- TENANTS -->
+  <!-- ====== TENANTS ====== -->
   <div id="panel-tenants" class="panel" style="display:none">
     <div class="section-header">
       <h2>מטפלים <span class="count-badge" id="tenants-count">0</span></h2>
@@ -405,14 +588,7 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>שם</th>
-            <th>סוגי טיפול</th>
-            <th>אימייל</th>
-            <th></th>
-          </tr>
-        </thead>
+        <thead><tr><th>שם</th><th>סוגי טיפול</th><th>אימייל</th><th></th></tr></thead>
         <tbody id="tenants-body">
           <tr><td colspan="4"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
         </tbody>
@@ -420,7 +596,7 @@
     </div>
   </div>
 
-  <!-- TYPES -->
+  <!-- ====== TYPES ====== -->
   <div id="panel-types" class="panel" style="display:none">
     <div class="section-header">
       <h2>סוגי טיפול <span class="count-badge" id="types-count">0</span></h2>
@@ -428,19 +604,14 @@
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>שם</th>
-            <th>שיעור קבוצתי</th>
-            <th></th>
-          </tr>
-        </thead>
+        <thead><tr><th>שם</th><th>שיעור קבוצתי</th><th></th></tr></thead>
         <tbody id="types-body">
           <tr><td colspan="3"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
         </tbody>
       </table>
     </div>
   </div>
+
 </div>
 
 <!-- MODAL -->
@@ -455,24 +626,25 @@
 // ==================== CONFIG ====================
 const API = 'https://script.google.com/macros/s/AKfycbyOu8ExgdkMilxbwPWfe0lRZ_PAmUz-NABKp6VrmqdFtvxzUtSyVgvpIPSyuU1UshA/exec';
 
+const HEB_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const HEB_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const HOUR_START = 7;
+const HOUR_END = 22;
+
 // ==================== STATE ====================
 let state = {
-  slots: [],
-  tenants: [],
-  types: [],
-  activeTab: 'slots'
+  slots: [], tenants: [], types: [],
+  activeTab: 'calendar',
+  calView: 'month',
+  calDate: new Date()
 };
 
 // ==================== API ====================
 async function apiGet(entity) {
   try {
     const res = await fetch(`${API}?entity=${entity}`);
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
-  } catch (e) {
-    toast('שגיאה בטעינת נתונים', 'error');
-    return [];
-  }
+    return await res.json() || [];
+  } catch (e) { toast('שגיאה בטעינת נתונים', 'error'); return []; }
 }
 
 async function apiPost(action, entity, data, id) {
@@ -485,121 +657,133 @@ async function apiPost(action, entity, data, id) {
       body: JSON.stringify(body)
     });
     const result = await res.json();
-    if (!result.success) throw new Error(result.error || 'Unknown error');
+    if (!result.success) throw new Error(result.error || 'שגיאה');
     return result.result;
-  } catch (e) {
-    toast(e.message || 'שגיאה', 'error');
-    throw e;
-  }
+  } catch (e) { toast(e.message || 'שגיאה', 'error'); throw e; }
 }
 
-// ==================== DATA LOADING ====================
 async function loadAll() {
   const [slots, tenants, types] = await Promise.all([
-    apiGet('slots'),
-    apiGet('tenants'),
-    apiGet('types')
+    apiGet('slots'), apiGet('tenants'), apiGet('types')
   ]);
-  state.slots = slots;
-  state.tenants = tenants;
-  state.types = types;
+  state.slots = Array.isArray(slots) ? slots : [];
+  state.tenants = Array.isArray(tenants) ? tenants : [];
+  state.types = Array.isArray(types) ? types : [];
   renderAll();
 }
 
 // ==================== LOOKUPS ====================
 function tenantName(id) {
-  const t = state.tenants.find(t => Number(t.id) === Number(id));
+  const t = state.tenants.find(x => Number(x.id) === Number(id));
   return t ? t.name : `#${id}`;
 }
-
 function typeName(id) {
-  const t = state.types.find(t => Number(t.id) === Number(id));
+  const t = state.types.find(x => Number(x.id) === Number(id));
   return t ? t.name : `#${id}`;
 }
-
-function typeNamesForTenant(typesStr) {
+function typeChipsForTenant(typesStr) {
   if (!typesStr) return '—';
   return String(typesStr).split(',').map(id => {
-    const t = state.types.find(t => Number(t.id) === Number(id.trim()));
+    const t = state.types.find(x => Number(x.id) === Number(id.trim()));
     return t ? `<span class="type-chip">${t.name}</span>` : '';
   }).filter(Boolean).join(' ');
 }
+function tenantColor(id) { return `tenant-c${Number(id) % 8}`; }
 
-// ==================== RENDER ====================
-function renderAll() {
-  renderSlots();
-  renderTenants();
-  renderTypes();
+// ==================== DATE UTILS ====================
+function fmtDate(d) {
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+function toInputDate(dateStr) {
+  if (!dateStr) return '';
+  const p = dateStr.split('/');
+  return p.length === 3 ? `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}` : '';
+}
+function fromInputDate(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function parseDMY(s) {
+  if (!s) return null;
+  const p = String(s).split('/');
+  if (p.length !== 3) return null;
+  return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
+}
+function sameDay(a, b) {
+  return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+}
+function timeToMin(t) {
+  if (!t) return 0;
+  const [h,m] = String(t).split(':').map(Number);
+  return (h||0)*60 + (m||0);
+}
+function weekStart(d) {
+  const r = new Date(d);
+  r.setDate(r.getDate() - r.getDay());
+  return r;
 }
 
+// ==================== RENDER ALL ====================
+function renderAll() {
+  renderSlots(); renderTenants(); renderTypes(); renderCalendar();
+}
+
+// ==================== TABLE RENDERS ====================
 function renderSlots() {
   const body = document.getElementById('slots-body');
-  const count = document.getElementById('slots-count');
-  count.textContent = state.slots.length;
-
-  if (state.slots.length === 0) {
-    body.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📅</div>אין תורים</div></td></tr>';
+  document.getElementById('slots-count').textContent = state.slots.length;
+  if (!state.slots.length) {
+    body.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים</div></td></tr>';
     return;
   }
-
-  body.innerHTML = state.slots.map(s => `
-    <tr>
-      <td>${s.date || '—'}</td>
-      <td>${s.time || '—'}</td>
-      <td>${tenantName(s.tenant_id)}</td>
-      <td><span class="type-chip">${typeName(s.type_id)}</span></td>
-      <td>${s.client_name || '—'}</td>
-      <td class="actions-cell">
-        <button class="btn btn-ghost btn-sm" onclick="openSlotModal(${s.id})" title="ערוך">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('slots', ${s.id})" title="מחק">🗑</button>
-      </td>
-    </tr>
-  `).join('');
+  body.innerHTML = state.slots.map(s => `<tr>
+    <td>${s.date||'—'}</td>
+    <td>${s.start_time||'—'}</td>
+    <td>${s.end_time||'—'}</td>
+    <td>${tenantName(s.tenant_id)}</td>
+    <td><span class="type-chip">${typeName(s.type_id)}</span></td>
+    <td>${s.client_name||'—'}</td>
+    <td class="actions-cell">
+      <button class="btn btn-ghost btn-sm" onclick="openSlotModal(${s.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete('slots',${s.id})">🗑</button>
+    </td>
+  </tr>`).join('');
 }
 
 function renderTenants() {
   const body = document.getElementById('tenants-body');
-  const count = document.getElementById('tenants-count');
-  count.textContent = state.tenants.length;
-
-  if (state.tenants.length === 0) {
+  document.getElementById('tenants-count').textContent = state.tenants.length;
+  if (!state.tenants.length) {
     body.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-icon">👤</div>אין מטפלים</div></td></tr>';
     return;
   }
-
-  body.innerHTML = state.tenants.map(t => `
-    <tr>
-      <td><strong>${t.name}</strong></td>
-      <td>${typeNamesForTenant(t.types)}</td>
-      <td style="direction:ltr;text-align:right">${t.email || '—'}</td>
-      <td class="actions-cell">
-        <button class="btn btn-ghost btn-sm" onclick="openTenantModal(${t.id})" title="ערוך">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('tenants', ${t.id})" title="מחק">🗑</button>
-      </td>
-    </tr>
-  `).join('');
+  body.innerHTML = state.tenants.map(t => `<tr>
+    <td><strong>${t.name}</strong></td>
+    <td>${typeChipsForTenant(t.types)}</td>
+    <td style="direction:ltr;text-align:right">${t.email||'—'}</td>
+    <td class="actions-cell">
+      <button class="btn btn-ghost btn-sm" onclick="openTenantModal(${t.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete('tenants',${t.id})">🗑</button>
+    </td>
+  </tr>`).join('');
 }
 
 function renderTypes() {
   const body = document.getElementById('types-body');
-  const count = document.getElementById('types-count');
-  count.textContent = state.types.length;
-
-  if (state.types.length === 0) {
+  document.getElementById('types-count').textContent = state.types.length;
+  if (!state.types.length) {
     body.innerHTML = '<tr><td colspan="3"><div class="empty"><div class="empty-icon">🏷</div>אין סוגי טיפול</div></td></tr>';
     return;
   }
-
-  body.innerHTML = state.types.map(t => `
-    <tr>
-      <td><strong>${t.name}</strong></td>
-      <td>${t.class_among_can ? '<span class="bool-yes">✓ כן</span>' : '<span class="bool-no">✗ לא</span>'}</td>
-      <td class="actions-cell">
-        <button class="btn btn-ghost btn-sm" onclick="openTypeModal(${t.id})" title="ערוך">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="confirmDelete('types', ${t.id})" title="מחק">🗑</button>
-      </td>
-    </tr>
-  `).join('');
+  body.innerHTML = state.types.map(t => `<tr>
+    <td><strong>${t.name}</strong></td>
+    <td>${t.class_among_can ? '<span class="bool-yes">✓ כן</span>' : '<span class="bool-no">✗ לא</span>'}</td>
+    <td class="actions-cell">
+      <button class="btn btn-ghost btn-sm" onclick="openTypeModal(${t.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDelete('types',${t.id})">🗑</button>
+    </td>
+  </tr>`).join('');
 }
 
 // ==================== TABS ====================
@@ -611,41 +795,196 @@ document.querySelectorAll('.tab').forEach(tab => {
     state.activeTab = name;
     document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
     document.getElementById(`panel-${name}`).style.display = '';
+    if (name === 'calendar') renderCalendar();
   });
 });
+
+// ==================== CALENDAR ====================
+function setCalView(v) {
+  state.calView = v;
+  document.querySelectorAll('[data-calview]').forEach(b => b.classList.toggle('active', b.dataset.calview === v));
+  renderCalendar();
+}
+function calNav(dir) {
+  const d = state.calDate;
+  if (state.calView === 'month') d.setMonth(d.getMonth() + dir);
+  else if (state.calView === 'week') d.setDate(d.getDate() + dir * 7);
+  else d.setDate(d.getDate() + dir);
+  renderCalendar();
+}
+function calToday() { state.calDate = new Date(); renderCalendar(); }
+
+function slotsForDate(date) {
+  const ds = fmtDate(date);
+  return state.slots.filter(s => s.date === ds);
+}
+
+function renderCalendar() {
+  const container = document.getElementById('cal-container');
+  const titleEl = document.getElementById('cal-title');
+  if (state.calView === 'month') renderMonthView(container, titleEl);
+  else if (state.calView === 'week') renderWeekView(container, titleEl);
+  else renderDayView(container, titleEl);
+}
+
+// ---- MONTH VIEW ----
+function renderMonthView(container, titleEl) {
+  const d = state.calDate;
+  const year = d.getFullYear(), month = d.getMonth();
+  titleEl.textContent = `${HEB_MONTHS[month]} ${year}`;
+
+  const firstDay = new Date(year, month, 1);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date();
+  const prevDays = new Date(year, month, 0).getDate();
+
+  let html = '<div class="cal-month-grid">';
+  for (let i = 0; i < 7; i++) html += `<div class="day-header">${HEB_DAYS[i]}</div>`;
+
+  for (let i = 0; i < startOffset; i++) {
+    html += `<div class="day-cell other-month"><div class="day-num">${prevDays - startOffset + i + 1}</div></div>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cellDate = new Date(year, month, day);
+    const isToday = sameDay(cellDate, today);
+    const events = slotsForDate(cellDate);
+    html += `<div class="day-cell${isToday?' today':''}" onclick="calDayClick('${fmtDate(cellDate)}')">`;
+    html += `<div class="day-num">${day}</div>`;
+    events.slice(0, 3).forEach(ev => {
+      const t = ev.start_time || '';
+      html += `<div class="cal-event ${tenantColor(ev.tenant_id)}" onclick="event.stopPropagation();openSlotModal(${ev.id})">${t} ${tenantName(ev.tenant_id)}</div>`;
+    });
+    if (events.length > 3) html += `<div style="font-size:0.68rem;color:var(--text-secondary);padding:0 6px">+${events.length-3} עוד</div>`;
+    html += '</div>';
+  }
+
+  const totalCells = startOffset + daysInMonth;
+  const remaining = (7 - totalCells % 7) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    html += `<div class="day-cell other-month"><div class="day-num">${i}</div></div>`;
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ---- WEEK VIEW ----
+function renderWeekView(container, titleEl) {
+  const ws = weekStart(state.calDate);
+  const days = [];
+  for (let i = 0; i < 7; i++) { const dd = new Date(ws); dd.setDate(dd.getDate()+i); days.push(dd); }
+  titleEl.textContent = `${fmtDate(days[0])} — ${fmtDate(days[6])}`;
+  renderTimeGrid(container, days);
+}
+
+// ---- DAY VIEW ----
+function renderDayView(container, titleEl) {
+  const d = state.calDate;
+  titleEl.textContent = `יום ${HEB_DAYS[d.getDay()]}׳ — ${fmtDate(d)}`;
+  renderTimeGrid(container, [d]);
+}
+
+// ---- TIME GRID (week + day) ----
+function renderTimeGrid(container, days) {
+  const cols = days.length;
+  const today = new Date();
+  const hours = [];
+  for (let h = HOUR_START; h <= HOUR_END; h++) hours.push(h);
+  const cellH = 52;
+
+  let html = '<div class="cal-time-grid">';
+
+  // Header
+  html += `<div class="tg-header" style="grid-template-columns:50px repeat(${cols}, 1fr)">`;
+  html += '<div class="tg-header-cell" style="border-inline-start:none"></div>';
+  days.forEach(d => {
+    const isToday = sameDay(d, today);
+    html += `<div class="tg-header-cell${isToday?' today-col':''}">יום ${HEB_DAYS[d.getDay()]}׳<br>${d.getDate()}/${d.getMonth()+1}</div>`;
+  });
+  html += '</div>';
+
+  // Body
+  html += `<div class="tg-body" style="grid-template-columns:50px repeat(${cols}, 1fr)">`;
+  hours.forEach(h => {
+    html += `<div class="tg-time-label">${String(h).padStart(2,'0')}:00</div>`;
+    days.forEach(d => {
+      const isToday = sameDay(d, today);
+      const dateStr = fmtDate(d);
+      html += `<div class="tg-cell${isToday?' today-col':''}" onclick="calCellClick('${dateStr}','${String(h).padStart(2,'0')}:00')">`;
+
+      // Events starting in this hour
+      slotsForDate(d).filter(ev => {
+        const st = timeToMin(ev.start_time);
+        return Math.floor(st / 60) === h;
+      }).forEach(ev => {
+        const st = timeToMin(ev.start_time);
+        const et = ev.end_time ? timeToMin(ev.end_time) : st + 60;
+        const topOff = (st % 60) / 60 * cellH;
+        const height = Math.max(((et - st) / 60) * cellH, 22);
+        html += `<div class="tg-event ${tenantColor(ev.tenant_id)}" style="top:${topOff}px;height:${height}px" onclick="event.stopPropagation();openSlotModal(${ev.id})">`;
+        html += `<span class="ev-time">${ev.start_time}–${ev.end_time||''}</span>`;
+        html += `<span class="ev-name"> ${ev.client_name || typeName(ev.type_id)}</span>`;
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+  });
+  html += '</div></div>';
+  container.innerHTML = html;
+}
+
+function calDayClick(dateStr) {
+  const p = dateStr.split('/');
+  state.calDate = new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
+  setCalView('day');
+}
+function calCellClick(dateStr, time) {
+  openSlotModal(null, dateStr, time);
+}
 
 // ==================== MODALS ====================
 function openModal(html) {
   document.getElementById('modal-content').innerHTML = html;
   document.getElementById('modal-overlay').classList.add('open');
 }
-
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
 }
 
 // -- SLOT MODAL --
-function openSlotModal(editId) {
-  const slot = editId ? state.slots.find(s => Number(s.id) === Number(editId)) : null;
+function openSlotModal(editId, prefillDate, prefillTime) {
+  const slot = editId ? state.slots.find(s => Number(s.id)===Number(editId)) : null;
   const isEdit = !!slot;
 
-  const tenantOpts = state.tenants.map(t =>
-    `<option value="${t.id}" ${slot && Number(slot.tenant_id) === Number(t.id) ? 'selected' : ''}>${t.name}</option>`
-  ).join('');
+  const dateVal = slot ? toInputDate(slot.date) : (prefillDate ? toInputDate(prefillDate) : '');
+  const startVal = slot ? (slot.start_time||'') : (prefillTime||'');
+  const endVal = slot ? (slot.end_time||'') : '';
 
+  const tenantOpts = state.tenants.map(t =>
+    `<option value="${t.id}" ${slot&&Number(slot.tenant_id)===Number(t.id)?'selected':''}>${t.name}</option>`
+  ).join('');
   const typeOpts = state.types.map(t =>
-    `<option value="${t.id}" ${slot && Number(slot.type_id) === Number(t.id) ? 'selected' : ''}>${t.name}</option>`
+    `<option value="${t.id}" ${slot&&Number(slot.type_id)===Number(t.id)?'selected':''}>${t.name}</option>`
   ).join('');
 
   openModal(`
-    <h3>${isEdit ? 'עריכת תור' : 'תור חדש'}</h3>
+    <h3>${isEdit?'עריכת תור':'תור חדש'}</h3>
     <div class="form-group">
       <label>תאריך</label>
-      <input type="date" id="f-date" value="${slot ? toInputDate(slot.date) : ''}">
+      <input type="date" id="f-date" value="${dateVal}">
     </div>
-    <div class="form-group">
-      <label>שעה</label>
-      <input type="time" id="f-time" value="${slot ? slot.time : ''}">
+    <div class="form-row">
+      <div class="form-group">
+        <label>שעת התחלה</label>
+        <input type="time" id="f-start" value="${startVal}">
+      </div>
+      <div class="form-group">
+        <label>שעת סיום</label>
+        <input type="time" id="f-end" value="${endVal}">
+      </div>
     </div>
     <div class="form-group">
       <label>מטפל</label>
@@ -657,122 +996,101 @@ function openSlotModal(editId) {
     </div>
     <div class="form-group">
       <label>שם לקוח</label>
-      <input type="text" id="f-client" value="${slot ? slot.client_name || '' : ''}" placeholder="שם הלקוח">
+      <input type="text" id="f-client" value="${slot?slot.client_name||'':''}" placeholder="שם הלקוח">
     </div>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveSlot(${editId || 'null'})">${isEdit ? 'שמור' : 'הוסף'}</button>
+      <button class="btn btn-primary" onclick="saveSlot(${editId||'null'})">${isEdit?'שמור':'הוסף'}</button>
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
     </div>
   `);
 }
 
 async function saveSlot(editId) {
-  const dateEl = document.getElementById('f-date');
   const data = {
-    date: fromInputDate(dateEl.value),
-    time: document.getElementById('f-time').value,
+    date: fromInputDate(document.getElementById('f-date').value),
+    start_time: document.getElementById('f-start').value,
+    end_time: document.getElementById('f-end').value,
     tenant_id: Number(document.getElementById('f-tenant').value),
     type_id: Number(document.getElementById('f-type').value),
     client_name: document.getElementById('f-client').value.trim()
   };
-
-  if (!data.date || !data.time || !data.tenant_id || !data.type_id) {
-    toast('נא למלא את כל השדות', 'error');
-    return;
+  if (!data.date || !data.start_time || !data.tenant_id || !data.type_id) {
+    toast('נא למלא תאריך, שעת התחלה, מטפל וסוג','error'); return;
   }
-
   try {
-    if (editId) {
-      await apiPost('update', 'slots', data, editId);
-      toast('התור עודכן', 'success');
-    } else {
-      await apiPost('add', 'slots', data);
-      toast('התור נוסף', 'success');
-    }
-    closeModal();
-    await loadAll();
-  } catch (e) {}
+    if (editId) { await apiPost('update','slots',data,editId); toast('התור עודכן','success'); }
+    else { await apiPost('add','slots',data); toast('התור נוסף','success'); }
+    closeModal(); await loadAll();
+  } catch(e){}
 }
 
-// -- TENANT MODAL --
+// -- TENANT MODAL (FIXED CHECKBOXES) --
 function openTenantModal(editId) {
-  const tenant = editId ? state.tenants.find(t => Number(t.id) === Number(editId)) : null;
+  const tenant = editId ? state.tenants.find(t => Number(t.id)===Number(editId)) : null;
   const isEdit = !!tenant;
-  const selectedTypes = tenant ? String(tenant.types).split(',').map(s => s.trim()) : [];
+  const sel = tenant ? String(tenant.types).split(',').map(s=>s.trim()) : [];
 
   const typeChecks = state.types.map(t => `
-    <label style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:0.85rem;cursor:pointer">
-      <input type="checkbox" class="type-check" value="${t.id}" ${selectedTypes.includes(String(t.id)) ? 'checked' : ''}>
-      ${t.name}
+    <label class="checkbox-item">
+      <input type="checkbox" class="type-check" value="${t.id}" ${sel.includes(String(t.id))?'checked':''}>
+      <span class="cb-label">${t.name}</span>
     </label>
   `).join('');
 
   openModal(`
-    <h3>${isEdit ? 'עריכת מטפל' : 'מטפל חדש'}</h3>
+    <h3>${isEdit?'עריכת מטפל':'מטפל חדש'}</h3>
     <div class="form-group">
       <label>שם</label>
-      <input type="text" id="f-name" value="${tenant ? tenant.name : ''}" placeholder="שם המטפל">
+      <input type="text" id="f-name" value="${tenant?tenant.name:''}" placeholder="שם המטפל">
     </div>
     <div class="form-group">
       <label>אימייל</label>
-      <input type="email" id="f-email" dir="ltr" value="${tenant ? tenant.email || '' : ''}" placeholder="email@example.com">
+      <input type="email" id="f-email" dir="ltr" value="${tenant?tenant.email||'':''}" placeholder="email@example.com">
     </div>
     <div class="form-group">
       <label>סוגי טיפול</label>
-      <div style="padding:8px 0">${typeChecks || '<span style="color:var(--text-secondary)">אין סוגי טיפול</span>'}</div>
+      <div class="checkbox-list">${typeChecks || '<div style="padding:12px;color:var(--text-secondary)">אין סוגי טיפול במערכת</div>'}</div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveTenant(${editId || 'null'})">${isEdit ? 'שמור' : 'הוסף'}</button>
+      <button class="btn btn-primary" onclick="saveTenant(${editId||'null'})">${isEdit?'שמור':'הוסף'}</button>
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
     </div>
   `);
 }
 
 async function saveTenant(editId) {
-  const types = [...document.querySelectorAll('.type-check:checked')].map(c => c.value).join(',');
+  const types = [...document.querySelectorAll('.type-check:checked')].map(c=>c.value).join(',');
   const data = {
     name: document.getElementById('f-name').value.trim(),
     email: document.getElementById('f-email').value.trim(),
     types
   };
-
-  if (!data.name) {
-    toast('נא להזין שם', 'error');
-    return;
-  }
-
+  if (!data.name) { toast('נא להזין שם','error'); return; }
   try {
-    if (editId) {
-      await apiPost('update', 'tenants', data, editId);
-      toast('המטפל עודכן', 'success');
-    } else {
-      await apiPost('add', 'tenants', data);
-      toast('המטפל נוסף', 'success');
-    }
-    closeModal();
-    await loadAll();
-  } catch (e) {}
+    if (editId) { await apiPost('update','tenants',data,editId); toast('המטפל עודכן','success'); }
+    else { await apiPost('add','tenants',data); toast('המטפל נוסף','success'); }
+    closeModal(); await loadAll();
+  } catch(e){}
 }
 
 // -- TYPE MODAL --
 function openTypeModal(editId) {
-  const type = editId ? state.types.find(t => Number(t.id) === Number(editId)) : null;
+  const type = editId ? state.types.find(t => Number(t.id)===Number(editId)) : null;
   const isEdit = !!type;
-
   openModal(`
-    <h3>${isEdit ? 'עריכת סוג טיפול' : 'סוג טיפול חדש'}</h3>
+    <h3>${isEdit?'עריכת סוג טיפול':'סוג טיפול חדש'}</h3>
     <div class="form-group">
       <label>שם</label>
-      <input type="text" id="f-tname" value="${type ? type.name : ''}" placeholder="שם סוג הטיפול">
+      <input type="text" id="f-tname" value="${type?type.name:''}" placeholder="שם סוג הטיפול">
     </div>
     <div class="form-group">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-        <input type="checkbox" id="f-class" ${type && type.class_among_can ? 'checked' : ''}>
-        שיעור קבוצתי (class)
+      <label class="checkbox-item" style="border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-hover)">
+        <input type="checkbox" id="f-class" ${type&&type.class_among_can?'checked':''}>
+        <span class="cb-label">שיעור קבוצתי (class)</span>
       </label>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-primary" onclick="saveType(${editId || 'null'})">${isEdit ? 'שמור' : 'הוסף'}</button>
+      <button class="btn btn-primary" onclick="saveType(${editId||'null'})">${isEdit?'שמור':'הוסף'}</button>
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
     </div>
   `);
@@ -783,67 +1101,40 @@ async function saveType(editId) {
     name: document.getElementById('f-tname').value.trim(),
     class_among_can: document.getElementById('f-class').checked
   };
-
-  if (!data.name) {
-    toast('נא להזין שם', 'error');
-    return;
-  }
-
+  if (!data.name) { toast('נא להזין שם','error'); return; }
   try {
-    if (editId) {
-      await apiPost('update', 'types', data, editId);
-      toast('סוג הטיפול עודכן', 'success');
-    } else {
-      await apiPost('add', 'types', data);
-      toast('סוג הטיפול נוסף', 'success');
-    }
-    closeModal();
-    await loadAll();
-  } catch (e) {}
+    if (editId) { await apiPost('update','types',data,editId); toast('סוג הטיפול עודכן','success'); }
+    else { await apiPost('add','types',data); toast('סוג הטיפול נוסף','success'); }
+    closeModal(); await loadAll();
+  } catch(e){}
 }
 
 // ==================== DELETE ====================
 function confirmDelete(entity, id) {
-  const labels = { slots: 'תור', tenants: 'מטפל', types: 'סוג טיפול' };
+  const labels = { slots:'תור', tenants:'מטפל', types:'סוג טיפול' };
   openModal(`
     <h3>מחיקת ${labels[entity]}</h3>
     <p style="margin-bottom:20px;color:var(--text-secondary)">האם למחוק? פעולה זו אינה ניתנת לביטול.</p>
     <div class="modal-actions">
-      <button class="btn btn-primary" style="background:var(--danger)" onclick="doDelete('${entity}', ${id})">מחק</button>
+      <button class="btn btn-primary" style="background:var(--danger)" onclick="doDelete('${entity}',${id})">מחק</button>
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
     </div>
   `);
 }
-
 async function doDelete(entity, id) {
   try {
-    await apiPost('delete', entity, {}, id);
-    toast('נמחק בהצלחה', 'success');
-    closeModal();
-    await loadAll();
-  } catch (e) {}
+    await apiPost('delete',entity,{},id);
+    toast('נמחק בהצלחה','success');
+    closeModal(); await loadAll();
+  } catch(e){}
 }
 
-// ==================== UTILS ====================
-function toInputDate(dateStr) {
-  if (!dateStr) return '';
-  const parts = dateStr.split('/');
-  if (parts.length !== 3) return '';
-  return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
-}
-
-function fromInputDate(isoStr) {
-  if (!isoStr) return '';
-  const [y, m, d] = isoStr.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function toast(msg, type = '') {
-  const container = document.getElementById('toast-container');
+// ==================== TOAST ====================
+function toast(msg, type='') {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
   el.textContent = msg;
-  container.appendChild(el);
+  document.getElementById('toast-container').appendChild(el);
   setTimeout(() => el.remove(), 3000);
 }
 
