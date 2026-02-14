@@ -1,630 +1,5 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ניהול קליניקה</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&family=Noto+Sans+Hebrew:wght@300;400;500;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #f5f0eb;
-    --surface: #ffffff;
-    --surface-hover: #faf8f6;
-    --border: #e2dcd5;
-    --border-focus: #8b7355;
-    --text: #2c2418;
-    --text-secondary: #7a6e5f;
-    --accent: #8b7355;
-    --accent-light: #b09a7a;
-    --accent-bg: #f0e8dc;
-    --danger: #c45c4a;
-    --danger-bg: #fdf0ee;
-    --success: #5a8a6a;
-    --success-bg: #edf5f0;
-    --shadow-sm: 0 1px 3px rgba(44,36,24,0.06);
-    --shadow-md: 0 4px 16px rgba(44,36,24,0.08);
-    --shadow-lg: 0 8px 32px rgba(44,36,24,0.12);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Noto Sans Hebrew', 'Rubik', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    line-height: 1.6;
-  }
-
-  /* ---- TOP BAR ---- */
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow-sm);
-  }
-  .topbar h1 {
-    font-family: 'Rubik', sans-serif;
-    font-weight: 700;
-    font-size: 1.3rem;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-    white-space: nowrap;
-  }
-  .topbar .dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    background: var(--success);
-    border-radius: 50%;
-    margin-inline-start: 8px;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-  /* ---- TABS ---- */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    background: var(--bg);
-    padding: 4px;
-    border-radius: var(--radius);
-  }
-  .tab {
-    padding: 8px 20px;
-    border: none;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: inherit;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    transition: var(--transition);
-    white-space: nowrap;
-  }
-  .tab:hover { background: var(--surface); color: var(--text); }
-  .tab.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-sm); }
-
-  /* ---- LAYOUT ---- */
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 80px; }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .section-header h2 {
-    font-family: 'Rubik', sans-serif;
-    font-weight: 600;
-    font-size: 1.1rem;
-  }
-  .count-badge {
-    background: var(--accent-bg);
-    color: var(--accent);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 10px;
-    border-radius: 20px;
-    margin-inline-start: 8px;
-  }
-
-  /* ---- BUTTONS ---- */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 18px;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition);
-    white-space: nowrap;
-  }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
-  .btn-ghost { background: transparent; color: var(--text-secondary); padding: 6px 10px; }
-  .btn-ghost:hover { background: var(--accent-bg); color: var(--accent); }
-  .btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--border); padding: 6px 14px; }
-  .btn-outline:hover { background: var(--accent-bg); border-color: var(--accent); }
-  .btn-outline.active { background: var(--accent); color: white; border-color: var(--accent); }
-  .btn-danger { background: transparent; color: var(--danger); padding: 6px 10px; }
-  .btn-danger:hover { background: var(--danger-bg); }
-  .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
-  .btn-icon { padding: 6px 8px; font-size: 1rem; }
-
-  /* ---- TABLE ---- */
-  .table-wrap {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    border: 1px solid var(--border);
-  }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    background: var(--surface-hover);
-    padding: 12px 16px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-align: right;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  tbody td {
-    padding: 12px 16px;
-    font-size: 0.875rem;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
-  tbody tr { transition: var(--transition); }
-  tbody tr:hover { background: var(--surface-hover); }
-  tbody tr:last-child td { border-bottom: none; }
-
-  .type-chip {
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: var(--accent-bg);
-    color: var(--accent);
-    margin: 1px 2px;
-  }
-  .bool-yes { color: var(--success); font-weight: 600; }
-  .bool-no { color: var(--text-secondary); }
-
-  /* ---- MODAL ---- */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(44,36,24,0.4);
-    backdrop-filter: blur(4px);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.15s ease;
-  }
-  .modal-overlay.open { display: flex; }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-  .modal {
-    background: var(--surface);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    width: 90%;
-    max-width: 480px;
-    padding: 28px;
-    animation: slideUp 0.2s ease;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-  .modal h3 {
-    font-family: 'Rubik', sans-serif;
-    font-weight: 600;
-    font-size: 1.05rem;
-    margin-bottom: 20px;
-  }
-
-  .form-group { margin-bottom: 16px; }
-  .form-group > label {
-    display: block;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-  }
-  .form-group input[type="text"],
-  .form-group input[type="email"],
-  .form-group input[type="date"],
-  .form-group input[type="time"],
-  .form-group select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    font-family: inherit;
-    font-size: 0.9rem;
-    color: var(--text);
-    background: var(--surface);
-    transition: var(--transition);
-    direction: rtl;
-  }
-  .form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgba(139,115,85,0.1);
-  }
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  /* ---- CHECKBOX LIST (FIXED) ---- */
-  .checkbox-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    background: var(--surface-hover);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .checkbox-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 14px;
-    cursor: pointer;
-    transition: var(--transition);
-    gap: 12px;
-    border-bottom: 1px solid var(--border);
-    user-select: none;
-  }
-  .checkbox-item:last-child { border-bottom: none; }
-  .checkbox-item:hover { background: var(--accent-bg); }
-  .checkbox-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--accent);
-    cursor: pointer;
-    flex-shrink: 0;
-    order: -1;
-  }
-  .checkbox-item .cb-label {
-    flex: 1;
-    font-size: 0.88rem;
-    color: var(--text);
-    line-height: 1.4;
-  }
-
-  .modal-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-start;
-    margin-top: 24px;
-  }
-
-  /* ---- TOAST ---- */
-  .toast-container {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 300;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-  }
-  .toast {
-    background: var(--text);
-    color: white;
-    padding: 10px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 0.85rem;
-    font-weight: 500;
-    box-shadow: var(--shadow-lg);
-    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
-  }
-  .toast.error { background: var(--danger); }
-  .toast.success { background: var(--success); }
-  @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
-
-  /* ---- LOADING / EMPTY ---- */
-  .loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 48px;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    gap: 10px;
-  }
-  .spinner {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .empty { text-align: center; padding: 48px 24px; color: var(--text-secondary); font-size: 0.9rem; }
-  .empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.5; }
-
-  /* ==== CALENDAR ==== */
-  .cal-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-  .cal-title {
-    font-family: 'Rubik', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    min-width: 140px;
-    text-align: center;
-  }
-  .cal-views {
-    display: flex;
-    gap: 4px;
-    margin-inline-start: auto;
-  }
-
-  /* Month grid */
-  .cal-month-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-  }
-  .cal-month-grid .day-header {
-    padding: 10px 4px;
-    text-align: center;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    background: var(--surface-hover);
-    border-bottom: 1px solid var(--border);
-  }
-  .cal-month-grid .day-cell {
-    min-height: 90px;
-    padding: 4px;
-    border-bottom: 1px solid var(--border);
-    border-inline-start: 1px solid var(--border);
-    position: relative;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-  .cal-month-grid .day-cell:nth-child(7n+2) { border-inline-start: none; }
-  .cal-month-grid .day-cell:hover { background: var(--surface-hover); }
-  .cal-month-grid .day-cell.other-month { opacity: 0.35; }
-  .cal-month-grid .day-cell.today { background: var(--accent-bg); }
-  .day-num {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    padding: 2px 6px;
-    display: inline-block;
-  }
-  .day-cell.today .day-num {
-    background: var(--accent);
-    color: white;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-  }
-  .cal-event {
-    display: block;
-    padding: 2px 6px;
-    margin: 1px 2px;
-    border-radius: 4px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-  .cal-event:hover { filter: brightness(0.92); }
-
-  /* Week / Day time grid */
-  .cal-time-grid {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    overflow-x: auto;
-    box-shadow: var(--shadow-sm);
-  }
-  .tg-header {
-    display: grid;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface-hover);
-    position: sticky;
-    top: 0;
-    z-index: 5;
-  }
-  .tg-header-cell {
-    padding: 10px 4px;
-    text-align: center;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border-inline-start: 1px solid var(--border);
-  }
-  .tg-header-cell:first-child { border-inline-start: none; }
-  .tg-header-cell.today-col { color: var(--accent); background: var(--accent-bg); }
-
-  .tg-body { display: grid; }
-  .tg-time-label {
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    padding: 2px 6px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .tg-cell {
-    border-bottom: 1px solid var(--border);
-    border-inline-start: 1px solid var(--border);
-    min-height: 52px;
-    position: relative;
-    cursor: pointer;
-    transition: var(--transition);
-  }
-  .tg-cell:hover { background: var(--surface-hover); }
-  .tg-cell.today-col { background: rgba(139,115,85,0.03); }
-
-  .tg-event {
-    position: absolute;
-    right: 2px;
-    left: 2px;
-    border-radius: 5px;
-    padding: 3px 7px;
-    font-size: 0.73rem;
-    font-weight: 500;
-    overflow: hidden;
-    cursor: pointer;
-    z-index: 2;
-    line-height: 1.3;
-    transition: var(--transition);
-    border: 1px solid rgba(0,0,0,0.06);
-  }
-  .tg-event:hover { filter: brightness(0.9); box-shadow: var(--shadow-md); }
-  .tg-event .ev-time { font-weight: 600; display: block; }
-  .tg-event .ev-name { opacity: 0.8; }
-
-  /* Tenant color palette */
-  .tenant-c0 { background: #e8d5c4; color: #5a3e2b; }
-  .tenant-c1 { background: #c4d9e8; color: #2b4a5a; }
-  .tenant-c2 { background: #d4e8c4; color: #3a5a2b; }
-  .tenant-c3 { background: #e8c4d4; color: #5a2b3e; }
-  .tenant-c4 { background: #d4c4e8; color: #3e2b5a; }
-  .tenant-c5 { background: #e8e4c4; color: #5a562b; }
-  .tenant-c6 { background: #c4e8e4; color: #2b5a56; }
-  .tenant-c7 { background: #e8cec4; color: #5a392b; }
-
-  /* ---- RESPONSIVE ---- */
-  @media (max-width: 640px) {
-    .topbar { padding: 8px 10px; flex-wrap: wrap; height: auto; gap: 6px; }
-    .topbar h1 { font-size: 1.05rem; }
-    .container { padding: 12px 6px 80px; }
-    .tab { padding: 7px 12px; font-size: 0.78rem; }
-    .modal { padding: 20px; width: 95%; }
-    thead th, tbody td { padding: 10px 8px; font-size: 0.8rem; }
-    .cal-month-grid .day-cell { min-height: 60px; }
-    .form-row { grid-template-columns: 1fr; }
-    .cal-views { margin-inline-start: 0; }
-  }
-</style>
-</head>
-<body>
-
-<!-- TOP BAR -->
-<div class="topbar">
-  <h1>ניהול קליניקה <span class="dot"></span></h1>
-  <div class="tabs">
-    <button class="tab active" data-tab="calendar">יומן</button>
-    <button class="tab" data-tab="slots">תורים</button>
-    <button class="tab" data-tab="tenants">מטפלים</button>
-    <button class="tab" data-tab="types">סוגי טיפול</button>
-  </div>
-</div>
-
-<div class="container">
-
-  <!-- ====== CALENDAR ====== -->
-  <div id="panel-calendar" class="panel">
-    <div class="cal-toolbar">
-      <button class="btn btn-ghost btn-icon" onclick="calNav(-1)">→</button>
-      <div class="cal-title" id="cal-title"></div>
-      <button class="btn btn-ghost btn-icon" onclick="calNav(1)">←</button>
-      <button class="btn btn-outline btn-sm" onclick="calToday()">היום</button>
-      <div class="cal-views">
-        <button class="btn btn-outline btn-sm active" data-calview="month" onclick="setCalView('month')">חודש</button>
-        <button class="btn btn-outline btn-sm" data-calview="week" onclick="setCalView('week')">שבוע</button>
-        <button class="btn btn-outline btn-sm" data-calview="day" onclick="setCalView('day')">יום</button>
-      </div>
-    </div>
-    <div id="cal-container"></div>
-  </div>
-
-  <!-- ====== SLOTS TABLE ====== -->
-  <div id="panel-slots" class="panel" style="display:none">
-    <div class="section-header">
-      <h2>תורים <span class="count-badge" id="slots-count">0</span></h2>
-      <button class="btn btn-primary" onclick="openSlotModal()">＋ תור חדש</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>תאריך</th><th>התחלה</th><th>סיום</th><th>מטפל</th><th>סוג</th><th>לקוח</th><th></th>
-        </tr></thead>
-        <tbody id="slots-body">
-          <tr><td colspan="7"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ====== TENANTS ====== -->
-  <div id="panel-tenants" class="panel" style="display:none">
-    <div class="section-header">
-      <h2>מטפלים <span class="count-badge" id="tenants-count">0</span></h2>
-      <button class="btn btn-primary" onclick="openTenantModal()">＋ מטפל חדש</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>שם</th><th>סוגי טיפול</th><th>אימייל</th><th></th></tr></thead>
-        <tbody id="tenants-body">
-          <tr><td colspan="4"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ====== TYPES ====== -->
-  <div id="panel-types" class="panel" style="display:none">
-    <div class="section-header">
-      <h2>סוגי טיפול <span class="count-badge" id="types-count">0</span></h2>
-      <button class="btn btn-primary" onclick="openTypeModal()">＋ סוג חדש</button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>שם</th><th>שיעור קבוצתי</th><th></th></tr></thead>
-        <tbody id="types-body">
-          <tr><td colspan="3"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-</div>
-
-<!-- MODAL -->
-<div class="modal-overlay" id="modal-overlay" onclick="event.target===this && closeModal()">
-  <div class="modal" id="modal-content"></div>
-</div>
-
-<!-- TOASTS -->
-<div class="toast-container" id="toast-container"></div>
-
-<script>
 // ==================== CONFIG ====================
-const API = 'https://script.google.com/macros/s/AKfycbyOu8ExgdkMilxbwPWfe0lRZ_PAmUz-NABKp6VrmqdFtvxzUtSyVgvpIPSyuU1UshA/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzTLCLhgZ4Hnnums48mByAvESEjNtHeK6Aj7CbAJTcPvve9C2qJ122Cl6-cKC7Mzqw/exec';
 
 const HEB_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 const HEB_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
@@ -710,6 +85,18 @@ function parseDMY(s) {
   if (p.length !== 3) return null;
   return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
 }
+function asDateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function boolish(v) {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number') return v === 1;
+  const s = String(v || '').trim().toLowerCase();
+  return s === '1' || s === 'true' || s === 'yes';
+}
+function isRecurringSlot(slot) {
+  return boolish(slot && slot.is_recurring);
+}
 function sameDay(a, b) {
   return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
 }
@@ -738,7 +125,7 @@ function renderSlots() {
     return;
   }
   body.innerHTML = state.slots.map(s => `<tr>
-    <td>${s.date||'—'}</td>
+    <td>${s.date||'—'}${isRecurringSlot(s) ? ` <span title="חוזר עד ${s.recurring_till || '—'}">🔁</span>` : ''}</td>
     <td>${s.start_time||'—'}</td>
     <td>${s.end_time||'—'}</td>
     <td>${tenantName(s.tenant_id)}</td>
@@ -815,8 +202,19 @@ function calNav(dir) {
 function calToday() { state.calDate = new Date(); renderCalendar(); }
 
 function slotsForDate(date) {
-  const ds = fmtDate(date);
-  return state.slots.filter(s => s.date === ds);
+  const target = asDateOnly(date);
+  return state.slots.filter(s => {
+    const base = parseDMY(s.date);
+    if (!base) return false;
+
+    if (!isRecurringSlot(s)) return sameDay(base, target);
+
+    const baseDay = asDateOnly(base);
+    const till = parseDMY(s.recurring_till);
+    const tillDay = till ? asDateOnly(till) : baseDay;
+    if (target < baseDay || target > tillDay) return false;
+    return target.getDay() === baseDay.getDay();
+  }).sort((a, b) => timeToMin(a.start_time) - timeToMin(b.start_time));
 }
 
 function renderCalendar() {
@@ -882,7 +280,7 @@ function renderWeekView(container, titleEl) {
 // ---- DAY VIEW ----
 function renderDayView(container, titleEl) {
   const d = state.calDate;
-  titleEl.textContent = `יום ${HEB_DAYS[d.getDay()]}׳ — ${fmtDate(d)}`;
+  titleEl.textContent = `יום ${HEB_DAYS[d.getDay()]} — ${fmtDate(d)}`;
   renderTimeGrid(container, [d]);
 }
 
@@ -901,7 +299,7 @@ function renderTimeGrid(container, days) {
   html += '<div class="tg-header-cell" style="border-inline-start:none"></div>';
   days.forEach(d => {
     const isToday = sameDay(d, today);
-    html += `<div class="tg-header-cell${isToday?' today-col':''}">יום ${HEB_DAYS[d.getDay()]}׳<br>${d.getDate()}/${d.getMonth()+1}</div>`;
+    html += `<div class="tg-header-cell${isToday?' today-col':''}">יום ${HEB_DAYS[d.getDay()]}<br>${d.getDate()}/${d.getMonth()+1}</div>`;
   });
   html += '</div>';
 
@@ -962,6 +360,8 @@ function openSlotModal(editId, prefillDate, prefillTime) {
   const dateVal = slot ? toInputDate(slot.date) : (prefillDate ? toInputDate(prefillDate) : '');
   const startVal = slot ? (slot.start_time||'') : (prefillTime||'');
   const endVal = slot ? (slot.end_time||'') : '';
+  const recurringVal = isRecurringSlot(slot);
+  const recurringTillVal = slot ? toInputDate(slot.recurring_till || '') : '';
 
   const tenantOpts = state.tenants.map(t =>
     `<option value="${t.id}" ${slot&&Number(slot.tenant_id)===Number(t.id)?'selected':''}>${t.name}</option>`
@@ -998,6 +398,16 @@ function openSlotModal(editId, prefillDate, prefillTime) {
       <label>שם לקוח</label>
       <input type="text" id="f-client" value="${slot?slot.client_name||'':''}" placeholder="שם הלקוח">
     </div>
+    <div class="form-group">
+      <label class="checkbox-item" style="border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-hover)">
+        <input type="checkbox" id="f-recurring" ${recurringVal ? 'checked' : ''} onchange="toggleRecurringTill()">
+        <span class="cb-label">אירוע חוזר (שבועי)</span>
+      </label>
+    </div>
+    <div class="form-group" id="f-recurring-till-wrap" style="display:${recurringVal ? 'block' : 'none'}">
+      <label>חוזר עד</label>
+      <input type="date" id="f-recurring-till" value="${recurringTillVal}">
+    </div>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="saveSlot(${editId||'null'})">${isEdit?'שמור':'הוסף'}</button>
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
@@ -1005,17 +415,38 @@ function openSlotModal(editId, prefillDate, prefillTime) {
   `);
 }
 
+function toggleRecurringTill() {
+  const recurring = document.getElementById('f-recurring')?.checked;
+  const wrap = document.getElementById('f-recurring-till-wrap');
+  if (!wrap) return;
+  wrap.style.display = recurring ? 'block' : 'none';
+}
+
 async function saveSlot(editId) {
+  const recurring = document.getElementById('f-recurring')?.checked;
+  const recurringTillIso = document.getElementById('f-recurring-till')?.value || '';
   const data = {
     date: fromInputDate(document.getElementById('f-date').value),
     start_time: document.getElementById('f-start').value,
     end_time: document.getElementById('f-end').value,
     tenant_id: Number(document.getElementById('f-tenant').value),
     type_id: Number(document.getElementById('f-type').value),
-    client_name: document.getElementById('f-client').value.trim()
+    client_name: document.getElementById('f-client').value.trim(),
+    is_recurring: !!recurring,
+    recurring_till: recurring ? fromInputDate(recurringTillIso) : ''
   };
   if (!data.date || !data.start_time || !data.tenant_id || !data.type_id) {
     toast('נא למלא תאריך, שעת התחלה, מטפל וסוג','error'); return;
+  }
+  if (data.is_recurring && !data.recurring_till) {
+    toast('נא לבחור תאריך סיום לחזרתיות','error'); return;
+  }
+  if (data.is_recurring) {
+    const startDate = parseDMY(data.date);
+    const tillDate = parseDMY(data.recurring_till);
+    if (!startDate || !tillDate || asDateOnly(tillDate) < asDateOnly(startDate)) {
+      toast('תאריך "חוזר עד" חייב להיות מאוחר או שווה לתאריך התור','error'); return;
+    }
   }
   try {
     if (editId) { await apiPost('update','slots',data,editId); toast('התור עודכן','success'); }
@@ -1140,6 +571,3 @@ function toast(msg, type='') {
 
 // ==================== INIT ====================
 loadAll();
-</script>
-</body>
-</html>
