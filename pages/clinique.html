@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ניהול קליניקה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&family=Noto+Sans+Hebrew:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0eb;
+    --surface: #ffffff;
+    --surface-hover: #faf8f6;
+    --border: #e2dcd5;
+    --border-focus: #8b7355;
+    --text: #2c2418;
+    --text-secondary: #7a6e5f;
+    --accent: #8b7355;
+    --accent-light: #b09a7a;
+    --accent-bg: #f0e8dc;
+    --danger: #c45c4a;
+    --danger-bg: #fdf0ee;
+    --success: #5a8a6a;
+    --success-bg: #edf5f0;
+    --shadow-sm: 0 1px 3px rgba(44,36,24,0.06);
+    --shadow-md: 0 4px 16px rgba(44,36,24,0.08);
+    --shadow-lg: 0 8px 32px rgba(44,36,24,0.12);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans Hebrew', 'Rubik', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ---- TOP BAR ---- */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .topbar h1 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .topbar .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    margin-inline-start: 8px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ---- TABS ---- */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    padding: 4px;
+    border-radius: var(--radius);
+  }
+  .tab {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+  }
+  .tab:hover { background: var(--surface); color: var(--text); }
+  .tab.active {
+    background: var(--surface);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---- LAYOUT ---- */
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-header h2 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--text);
+  }
+  .count-badge {
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-inline-start: 8px;
+  }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-light); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 6px 10px;
+  }
+  .btn-ghost:hover { background: var(--accent-bg); color: var(--accent); }
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    padding: 6px 10px;
+  }
+  .btn-danger:hover { background: var(--danger-bg); }
+  .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+
+  /* ---- TABLE ---- */
+  .table-wrap {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead th {
+    background: var(--surface-hover);
+    padding: 12px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr { transition: var(--transition); }
+  tbody tr:hover { background: var(--surface-hover); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .type-chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: var(--accent-bg);
+    color: var(--accent);
+  }
+  .bool-yes {
+    color: var(--success);
+    font-weight: 600;
+  }
+  .bool-no {
+    color: var(--text-secondary);
+  }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(44,36,24,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    width: 90%;
+    max-width: 480px;
+    padding: 28px;
+    animation: slideUp 0.2s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal h3 {
+    font-family: 'Rubik', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--surface);
+    transition: var(--transition);
+    direction: rtl;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(139,115,85,0.1);
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-top: 24px;
+  }
+
+  /* ---- TOAST ---- */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+  .toast {
+    background: var(--text);
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+  }
+  .toast.error { background: var(--danger); }
+  .toast.success { background: var(--success); }
+  @keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+  /* ---- LOADING ---- */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    gap: 10px;
+  }
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---- EMPTY STATE ---- */
+  .empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 640px) {
+    .topbar { padding: 0 12px; }
+    .topbar h1 { font-size: 1.1rem; }
+    .container { padding: 16px 8px 80px; }
+    .tab { padding: 8px 14px; font-size: 0.8rem; }
+    .modal { padding: 20px; width: 95%; }
+    .table-wrap { font-size: 0.82rem; }
+    thead th, tbody td { padding: 10px 10px; }
+    .actions-cell { display: flex; gap: 2px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <h1>ניהול קליניקה <span class="dot"></span></h1>
+  <div class="tabs">
+    <button class="tab active" data-tab="slots">תורים</button>
+    <button class="tab" data-tab="tenants">מטפלים</button>
+    <button class="tab" data-tab="types">סוגי טיפול</button>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+  <!-- SLOTS -->
+  <div id="panel-slots" class="panel">
+    <div class="section-header">
+      <h2>תורים <span class="count-badge" id="slots-count">0</span></h2>
+      <button class="btn btn-primary" onclick="openSlotModal()">＋ תור חדש</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>תאריך</th>
+            <th>שעה</th>
+            <th>מטפל</th>
+            <th>סוג</th>
+            <th>לקוח</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="slots-body">
+          <tr><td colspan="6"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TENANTS -->
+  <div id="panel-tenants" class="panel" style="display:none">
+    <div class="section-header">
+      <h2>מטפלים <span class="count-badge" id="tenants-count">0</span></h2>
+      <button class="btn btn-primary" onclick="openTenantModal()">＋ מטפל חדש</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>שם</th>
+            <th>סוגי טיפול</th>
+            <th>אימייל</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tenants-body">
+          <tr><td colspan="4"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TYPES -->
+  <div id="panel-types" class="panel" style="display:none">
+    <div class="section-header">
+      <h2>סוגי טיפול <span class="count-badge" id="types-count">0</span></h2>
+      <button class="btn btn-primary" onclick="openTypeModal()">＋ סוג חדש</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>שם</th>
+            <th>שיעור קבוצתי</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="types-body">
+          <tr><td colspan="3"><div class="loading"><div class="spinner"></div>טוען...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="event.target===this && closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ==================== CONFIG ====================
+const API = 'https://script.google.com/macros/s/AKfycbyOu8ExgdkMilxbwPWfe0lRZ_PAmUz-NABKp6VrmqdFtvxzUtSyVgvpIPSyuU1UshA/exec';
+
+// ==================== STATE ====================
+let state = {
+  slots: [],
+  tenants: [],
+  types: [],
+  activeTab: 'slots'
+};
+
+// ==================== API ====================
+async function apiGet(entity) {
+  try {
+    const res = await fetch(`${API}?entity=${entity}`);
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    toast('שגיאה בטעינת נתונים', 'error');
+    return [];
+  }
+}
+
+async function apiPost(action, entity, data, id) {
+  try {
+    const body = { action, entity, data };
+    if (id) body.id = Number(id);
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body)
+    });
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error || 'Unknown error');
+    return result.result;
+  } catch (e) {
+    toast(e.message || 'שגיאה', 'error');
+    throw e;
+  }
+}
+
+// ==================== DATA LOADING ====================
+async function loadAll() {
+  const [slots, tenants, types] = await Promise.all([
+    apiGet('slots'),
+    apiGet('tenants'),
+    apiGet('types')
+  ]);
+  state.slots = slots;
+  state.tenants = tenants;
+  state.types = types;
+  renderAll();
+}
+
+// ==================== LOOKUPS ====================
+function tenantName(id) {
+  const t = state.tenants.find(t => Number(t.id) === Number(id));
+  return t ? t.name : `#${id}`;
+}
+
+function typeName(id) {
+  const t = state.types.find(t => Number(t.id) === Number(id));
+  return t ? t.name : `#${id}`;
+}
+
+function typeNamesForTenant(typesStr) {
+  if (!typesStr) return '—';
+  return String(typesStr).split(',').map(id => {
+    const t = state.types.find(t => Number(t.id) === Number(id.trim()));
+    return t ? `<span class="type-chip">${t.name}</span>` : '';
+  }).filter(Boolean).join(' ');
+}
+
+// ==================== RENDER ====================
+function renderAll() {
+  renderSlots();
+  renderTenants();
+  renderTypes();
+}
+
+function renderSlots() {
+  const body = document.getElementById('slots-body');
+  const count = document.getElementById('slots-count');
+  count.textContent = state.slots.length;
+
+  if (state.slots.length === 0) {
+    body.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📅</div>אין תורים</div></td></tr>';
+    return;
+  }
+
+  body.innerHTML = state.slots.map(s => `
+    <tr>
+      <td>${s.date || '—'}</td>
+      <td>${s.time || '—'}</td>
+      <td>${tenantName(s.tenant_id)}</td>
+      <td><span class="type-chip">${typeName(s.type_id)}</span></td>
+      <td>${s.client_name || '—'}</td>
+      <td class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="openSlotModal(${s.id})" title="ערוך">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('slots', ${s.id})" title="מחק">🗑</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderTenants() {
+  const body = document.getElementById('tenants-body');
+  const count = document.getElementById('tenants-count');
+  count.textContent = state.tenants.length;
+
+  if (state.tenants.length === 0) {
+    body.innerHTML = '<tr><td colspan="4"><div class="empty"><div class="empty-icon">👤</div>אין מטפלים</div></td></tr>';
+    return;
+  }
+
+  body.innerHTML = state.tenants.map(t => `
+    <tr>
+      <td><strong>${t.name}</strong></td>
+      <td>${typeNamesForTenant(t.types)}</td>
+      <td style="direction:ltr;text-align:right">${t.email || '—'}</td>
+      <td class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="openTenantModal(${t.id})" title="ערוך">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('tenants', ${t.id})" title="מחק">🗑</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderTypes() {
+  const body = document.getElementById('types-body');
+  const count = document.getElementById('types-count');
+  count.textContent = state.types.length;
+
+  if (state.types.length === 0) {
+    body.innerHTML = '<tr><td colspan="3"><div class="empty"><div class="empty-icon">🏷</div>אין סוגי טיפול</div></td></tr>';
+    return;
+  }
+
+  body.innerHTML = state.types.map(t => `
+    <tr>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.class_among_can ? '<span class="bool-yes">✓ כן</span>' : '<span class="bool-no">✗ לא</span>'}</td>
+      <td class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="openTypeModal(${t.id})" title="ערוך">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('types', ${t.id})" title="מחק">🗑</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ==================== TABS ====================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const name = tab.dataset.tab;
+    state.activeTab = name;
+    document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+    document.getElementById(`panel-${name}`).style.display = '';
+  });
+});
+
+// ==================== MODALS ====================
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// -- SLOT MODAL --
+function openSlotModal(editId) {
+  const slot = editId ? state.slots.find(s => Number(s.id) === Number(editId)) : null;
+  const isEdit = !!slot;
+
+  const tenantOpts = state.tenants.map(t =>
+    `<option value="${t.id}" ${slot && Number(slot.tenant_id) === Number(t.id) ? 'selected' : ''}>${t.name}</option>`
+  ).join('');
+
+  const typeOpts = state.types.map(t =>
+    `<option value="${t.id}" ${slot && Number(slot.type_id) === Number(t.id) ? 'selected' : ''}>${t.name}</option>`
+  ).join('');
+
+  openModal(`
+    <h3>${isEdit ? 'עריכת תור' : 'תור חדש'}</h3>
+    <div class="form-group">
+      <label>תאריך</label>
+      <input type="date" id="f-date" value="${slot ? toInputDate(slot.date) : ''}">
+    </div>
+    <div class="form-group">
+      <label>שעה</label>
+      <input type="time" id="f-time" value="${slot ? slot.time : ''}">
+    </div>
+    <div class="form-group">
+      <label>מטפל</label>
+      <select id="f-tenant"><option value="">בחר...</option>${tenantOpts}</select>
+    </div>
+    <div class="form-group">
+      <label>סוג טיפול</label>
+      <select id="f-type"><option value="">בחר...</option>${typeOpts}</select>
+    </div>
+    <div class="form-group">
+      <label>שם לקוח</label>
+      <input type="text" id="f-client" value="${slot ? slot.client_name || '' : ''}" placeholder="שם הלקוח">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveSlot(${editId || 'null'})">${isEdit ? 'שמור' : 'הוסף'}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+    </div>
+  `);
+}
+
+async function saveSlot(editId) {
+  const dateEl = document.getElementById('f-date');
+  const data = {
+    date: fromInputDate(dateEl.value),
+    time: document.getElementById('f-time').value,
+    tenant_id: Number(document.getElementById('f-tenant').value),
+    type_id: Number(document.getElementById('f-type').value),
+    client_name: document.getElementById('f-client').value.trim()
+  };
+
+  if (!data.date || !data.time || !data.tenant_id || !data.type_id) {
+    toast('נא למלא את כל השדות', 'error');
+    return;
+  }
+
+  try {
+    if (editId) {
+      await apiPost('update', 'slots', data, editId);
+      toast('התור עודכן', 'success');
+    } else {
+      await apiPost('add', 'slots', data);
+      toast('התור נוסף', 'success');
+    }
+    closeModal();
+    await loadAll();
+  } catch (e) {}
+}
+
+// -- TENANT MODAL --
+function openTenantModal(editId) {
+  const tenant = editId ? state.tenants.find(t => Number(t.id) === Number(editId)) : null;
+  const isEdit = !!tenant;
+  const selectedTypes = tenant ? String(tenant.types).split(',').map(s => s.trim()) : [];
+
+  const typeChecks = state.types.map(t => `
+    <label style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:0.85rem;cursor:pointer">
+      <input type="checkbox" class="type-check" value="${t.id}" ${selectedTypes.includes(String(t.id)) ? 'checked' : ''}>
+      ${t.name}
+    </label>
+  `).join('');
+
+  openModal(`
+    <h3>${isEdit ? 'עריכת מטפל' : 'מטפל חדש'}</h3>
+    <div class="form-group">
+      <label>שם</label>
+      <input type="text" id="f-name" value="${tenant ? tenant.name : ''}" placeholder="שם המטפל">
+    </div>
+    <div class="form-group">
+      <label>אימייל</label>
+      <input type="email" id="f-email" dir="ltr" value="${tenant ? tenant.email || '' : ''}" placeholder="email@example.com">
+    </div>
+    <div class="form-group">
+      <label>סוגי טיפול</label>
+      <div style="padding:8px 0">${typeChecks || '<span style="color:var(--text-secondary)">אין סוגי טיפול</span>'}</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveTenant(${editId || 'null'})">${isEdit ? 'שמור' : 'הוסף'}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+    </div>
+  `);
+}
+
+async function saveTenant(editId) {
+  const types = [...document.querySelectorAll('.type-check:checked')].map(c => c.value).join(',');
+  const data = {
+    name: document.getElementById('f-name').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    types
+  };
+
+  if (!data.name) {
+    toast('נא להזין שם', 'error');
+    return;
+  }
+
+  try {
+    if (editId) {
+      await apiPost('update', 'tenants', data, editId);
+      toast('המטפל עודכן', 'success');
+    } else {
+      await apiPost('add', 'tenants', data);
+      toast('המטפל נוסף', 'success');
+    }
+    closeModal();
+    await loadAll();
+  } catch (e) {}
+}
+
+// -- TYPE MODAL --
+function openTypeModal(editId) {
+  const type = editId ? state.types.find(t => Number(t.id) === Number(editId)) : null;
+  const isEdit = !!type;
+
+  openModal(`
+    <h3>${isEdit ? 'עריכת סוג טיפול' : 'סוג טיפול חדש'}</h3>
+    <div class="form-group">
+      <label>שם</label>
+      <input type="text" id="f-tname" value="${type ? type.name : ''}" placeholder="שם סוג הטיפול">
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="f-class" ${type && type.class_among_can ? 'checked' : ''}>
+        שיעור קבוצתי (class)
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveType(${editId || 'null'})">${isEdit ? 'שמור' : 'הוסף'}</button>
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+    </div>
+  `);
+}
+
+async function saveType(editId) {
+  const data = {
+    name: document.getElementById('f-tname').value.trim(),
+    class_among_can: document.getElementById('f-class').checked
+  };
+
+  if (!data.name) {
+    toast('נא להזין שם', 'error');
+    return;
+  }
+
+  try {
+    if (editId) {
+      await apiPost('update', 'types', data, editId);
+      toast('סוג הטיפול עודכן', 'success');
+    } else {
+      await apiPost('add', 'types', data);
+      toast('סוג הטיפול נוסף', 'success');
+    }
+    closeModal();
+    await loadAll();
+  } catch (e) {}
+}
+
+// ==================== DELETE ====================
+function confirmDelete(entity, id) {
+  const labels = { slots: 'תור', tenants: 'מטפל', types: 'סוג טיפול' };
+  openModal(`
+    <h3>מחיקת ${labels[entity]}</h3>
+    <p style="margin-bottom:20px;color:var(--text-secondary)">האם למחוק? פעולה זו אינה ניתנת לביטול.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="background:var(--danger)" onclick="doDelete('${entity}', ${id})">מחק</button>
+      <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+    </div>
+  `);
+}
+
+async function doDelete(entity, id) {
+  try {
+    await apiPost('delete', entity, {}, id);
+    toast('נמחק בהצלחה', 'success');
+    closeModal();
+    await loadAll();
+  } catch (e) {}
+}
+
+// ==================== UTILS ====================
+function toInputDate(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return '';
+  return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+}
+
+function fromInputDate(isoStr) {
+  if (!isoStr) return '';
+  const [y, m, d] = isoStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function toast(msg, type = '') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ==================== INIT ====================
+loadAll();
+</script>
+</body>
+</html>
