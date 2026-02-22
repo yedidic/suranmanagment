@@ -161,6 +161,11 @@ function weekStart(d) {
 function minutesToTime(m) {
   return `${String(Math.floor(m / 60)).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`;
 }
+function addMinutesToTime(timeStr, minutesToAdd) {
+  const base = timeToMin(timeStr);
+  const wrapped = ((base + minutesToAdd) % (24 * 60) + (24 * 60)) % (24 * 60);
+  return minutesToTime(wrapped);
+}
 function overlaps(aStart, aEnd, bStart, bEnd) {
   return aStart < bEnd && aEnd > bStart;
 }
@@ -192,31 +197,96 @@ function renderAll() {
 
 // ==================== TABLE RENDERS ====================
 function renderSlots() {
-  const body = document.getElementById('slots-body');
+  const upcomingBody = document.getElementById('slots-upcoming-body');
+  const pastBody = document.getElementById('slots-past-body');
+
   document.getElementById('slots-count').textContent = state.slots.length;
+
   if (!state.slots.length) {
-    body.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים</div></td></tr>';
+    upcomingBody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים עתידיים</div></td></tr>';
+    pastBody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים בעבר</div></td></tr>';
+    document.getElementById('slots-upcoming-count').textContent = '0';
+    document.getElementById('slots-past-count').textContent = '0';
     return;
   }
-  const sortedSlots = [...state.slots].sort((a, b) => {
+
+  const now = new Date();
+  const nowTime = now.getTime();
+
+  // Separate slots into past and upcoming
+  const upcomingSlots = [];
+  const pastSlots = [];
+
+  state.slots.forEach(s => {
+    const slotDate = parseDMY(s.date);
+    if (!slotDate) return;
+
+    const slotDateTime = slotDate.getTime() + timeToMin(s.start_time) * 60000;
+
+    if (slotDateTime >= nowTime) {
+      upcomingSlots.push(s);
+    } else {
+      pastSlots.push(s);
+    }
+  });
+
+  // Sort upcoming: earliest first
+  upcomingSlots.sort((a, b) => {
+    const ad = parseDMY(a.date);
+    const bd = parseDMY(b.date);
+    const at = (ad ? ad.getTime() : 0) + timeToMin(a.start_time) * 60000;
+    const bt = (bd ? bd.getTime() : 0) + timeToMin(b.start_time) * 60000;
+    return at - bt;
+  });
+
+  // Sort past: most recent first
+  pastSlots.sort((a, b) => {
     const ad = parseDMY(a.date);
     const bd = parseDMY(b.date);
     const at = (ad ? ad.getTime() : 0) + timeToMin(a.start_time) * 60000;
     const bt = (bd ? bd.getTime() : 0) + timeToMin(b.start_time) * 60000;
     return bt - at;
   });
-  body.innerHTML = sortedSlots.map(s => `<tr>
-    <td>${s.date||'—'}${isRecurringSlot(s) ? ` <span title="חוזר עד ${s.recurring_till || '—'}">🔁</span>` : ''}</td>
-    <td>${s.start_time||'—'}</td>
-    <td>${s.end_time||'—'}</td>
-    <td>${tenantName(s.tenant_id)}</td>
-    <td><span class="type-chip">${typeName(s.type_id)}</span></td>
-    <td>${s.client_name||'—'}</td>
-    <td class="actions-cell">
-      <button class="btn btn-ghost btn-sm" onclick="openSlotModal(${s.id})">✏️</button>
-      <button class="btn btn-danger btn-sm" onclick="confirmDelete('slots',${s.id})">🗑</button>
-    </td>
-  </tr>`).join('');
+
+  // Render upcoming slots
+  if (upcomingSlots.length === 0) {
+    upcomingBody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים עתידיים</div></td></tr>';
+  } else {
+    upcomingBody.innerHTML = upcomingSlots.map(s => `<tr>
+      <td class="slot-date" data-label="תאריך">${s.date||'—'}${isRecurringSlot(s) ? ` <span title="חוזר עד ${s.recurring_till || '—'}">🔁</span>` : ''}</td>
+      <td class="slot-time" data-label="התחלה">${s.start_time||'—'}</td>
+      <td class="slot-time" data-label="סיום">${s.end_time||'—'}</td>
+      <td class="slot-tenant" data-label="מטפל">${tenantName(s.tenant_id)}</td>
+      <td class="slot-type" data-label="סוג"><span class="type-chip">${typeName(s.type_id)}</span></td>
+      <td class="slot-client" data-label="לקוח">${s.client_name||'—'}</td>
+      <td class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="openSlotModal(${s.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('slots',${s.id})">🗑</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  // Render past slots
+  if (pastSlots.length === 0) {
+    pastBody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים בעבר</div></td></tr>';
+  } else {
+    pastBody.innerHTML = pastSlots.map(s => `<tr>
+      <td class="slot-date" data-label="תאריך">${s.date||'—'}${isRecurringSlot(s) ? ` <span title="חוזר עד ${s.recurring_till || '—'}">🔁</span>` : ''}</td>
+      <td class="slot-time" data-label="התחלה">${s.start_time||'—'}</td>
+      <td class="slot-time" data-label="סיום">${s.end_time||'—'}</td>
+      <td class="slot-tenant" data-label="מטפל">${tenantName(s.tenant_id)}</td>
+      <td class="slot-type" data-label="סוג"><span class="type-chip">${typeName(s.type_id)}</span></td>
+      <td class="slot-client" data-label="לקוח">${s.client_name||'—'}</td>
+      <td class="actions-cell">
+        <button class="btn btn-ghost btn-sm" onclick="openSlotModal(${s.id})">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDelete('slots',${s.id})">🗑</button>
+      </td>
+    </tr>`).join('');
+  }
+
+  // Update counts
+  document.getElementById('slots-upcoming-count').textContent = upcomingSlots.length;
+  document.getElementById('slots-past-count').textContent = pastSlots.length;
 }
 
 function renderTenants() {
@@ -252,6 +322,22 @@ function renderTypes() {
       <button class="btn btn-danger btn-sm" onclick="confirmDelete('types',${t.id})">🗑</button>
     </td>
   </tr>`).join('');
+}
+
+// ==================== ACCORDIONS ====================
+function toggleAccordion(id) {
+  const content = document.getElementById(`accordion-${id}`);
+  const icon = document.getElementById(`accordion-icon-${id}`);
+  if (!content || !icon) return;
+
+  const isOpen = content.classList.contains('open');
+  if (isOpen) {
+    content.classList.remove('open');
+    icon.textContent = '◀';
+  } else {
+    content.classList.add('open');
+    icon.textContent = '▼';
+  }
 }
 
 // ==================== TABS ====================
@@ -316,6 +402,7 @@ function dayDisplayEvents(date) {
     key: `class-${ev.id}-${i}`,
     kind: 'class',
     source: ev,
+    ref: ev.ref,
     start: timeToMin(ev.start_time),
     end: timeToMin(ev.end_time),
     start_time: ev.start_time,
@@ -715,7 +802,7 @@ function openSlotModal(editId, prefillDate, prefillTime) {
 
   const dateVal = slot ? toInputDate(slot.date) : (prefillDate ? toInputDate(prefillDate) : '');
   const startVal = slot ? (slot.start_time||'') : (prefillTime||'');
-  const endVal = slot ? (slot.end_time||'') : '';
+  const endVal = slot ? (slot.end_time||'') : (startVal ? addMinutesToTime(startVal, 60) : '');
   const recurringVal = isRecurringSlot(slot);
   const recurringTillVal = slot ? toInputDate(slot.recurring_till || '') : '';
 
@@ -735,11 +822,11 @@ function openSlotModal(editId, prefillDate, prefillTime) {
     <div class="form-row">
       <div class="form-group">
         <label>שעת התחלה</label>
-        <input type="time" id="f-start" value="${startVal}">
+        <input type="time" id="f-start" value="${startVal}" lang="en-GB" step="60" onchange="onSlotStartTimeChange()">
       </div>
       <div class="form-group">
         <label>שעת סיום</label>
-        <input type="time" id="f-end" value="${endVal}">
+        <input type="time" id="f-end" value="${endVal}" lang="en-GB" step="60">
       </div>
     </div>
     <div class="form-group">
@@ -783,6 +870,13 @@ function onSlotTenantChange() {
     .find(v => Number.isFinite(v) && v > 0);
   if (!firstTypeId) return;
   typeSelect.value = String(firstTypeId);
+}
+
+function onSlotStartTimeChange() {
+  const startInput = document.getElementById('f-start');
+  const endInput = document.getElementById('f-end');
+  if (!startInput || !endInput || !startInput.value) return;
+  endInput.value = addMinutesToTime(startInput.value, 60);
 }
 
 function toggleRecurringTill() {
