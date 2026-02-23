@@ -719,14 +719,16 @@ function renderTimeGrid(container, days) {
         const widthPct = 100 / ev.cols;
         const leftPct = ev.col * widthPct;
         const baseStyle = `top:${topOff}px;height:${height}px;right:auto;left:calc(${leftPct}% + 2px);width:calc(${widthPct}% - 4px)`;
+        const classWidthPct = ev.cols === 1 ? widthPct * 0.7 : widthPct;
+        const classStyle = `top:${topOff}px;height:${height}px;right:auto;left:calc(${leftPct}% + 2px);width:calc(${classWidthPct}% - 4px)`;
         if (ev.kind === 'class') {
-          html += `<div class="tg-event tg-class-event" style="${baseStyle};background:${ev.color}" title="${ev.title} (Arbox)" onclick="event.stopPropagation();openArboxClassModal('${ev.ref}')">`;
+          html += `<div class="tg-event tg-class-event" style="${classStyle}" title="${ev.title} (Arbox)" onclick="event.stopPropagation();openArboxClassModal('${ev.ref}')">`;
           html += `<span class="ev-time">${ev.start_time}–${ev.end_time}</span>`;
           html += `<span class="ev-name"> ${ev.title} (Arbox)</span>`;
         } else {
           html += `<div class="tg-event ${tenantColor(ev.source.tenant_id)}" style="${baseStyle}" onclick="event.stopPropagation();openSlotModal(${ev.source.id})">`;
           html += `<span class="ev-time">${ev.source.start_time}–${ev.source.end_time||''}</span>`;
-          html += `<span class="ev-name"> ${ev.title}</span>`;
+          html += `<span class="ev-name"> ${tenantName(ev.source.tenant_id)}</span>`;
         }
         html += '</div>';
       });

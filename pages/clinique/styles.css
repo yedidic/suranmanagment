@@ -614,7 +614,9 @@
     left: 10px;
     right: 10px;
     z-index: 1;
-    border: 1px dashed rgba(33,53,77,0.25);
+    background: #d1d5db;
+    color: #4b5563;
+    border: 1px dashed rgba(0,0,0,0.15);
     opacity: 0.65;
   }
 
