@@ -629,7 +629,7 @@ function renderMonthView(container, titleEl) {
     html += `<div class="day-cell${isToday?' today':''}" onclick="calDayClick('${fmtDate(cellDate)}')">`;
     html += `<div class="day-num">${day}</div>`;
     classEvents.slice(0, 2).forEach(ev => {
-      html += `<div class="cal-event cal-class-event" style="background:${ev.color}" title="${ev.title} (Arbox)" onclick="event.stopPropagation();openArboxClassModal('${ev.ref}')">${ev.start_time} ${ev.title} (Arbox)</div>`;
+      html += `<div class="cal-event cal-class-event" title="${ev.title} (Arbox)" onclick="event.stopPropagation();openArboxClassModal('${ev.ref}')">${ev.start_time} ${ev.title} (Arbox)</div>`;
     });
     events.slice(0, 3).forEach(ev => {
       const t = ev.start_time || '';
