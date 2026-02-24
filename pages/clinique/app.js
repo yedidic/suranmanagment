@@ -145,6 +145,20 @@ function boolish(v) {
 function isRecurringSlot(slot) {
   return boolish(slot && slot.is_recurring);
 }
+function nextRecurringDate(slot) {
+  if (!isRecurringSlot(slot)) return slot.date;
+  const base = parseDMY(slot.date);
+  if (!base) return slot.date;
+  const today = asDateOnly(new Date());
+  const till = parseDMY(slot.recurring_till);
+  const tillDay = till ? asDateOnly(till) : null;
+  let cursor = asDateOnly(base);
+  while (cursor < today) {
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  if (tillDay && cursor > tillDay) return slot.date;
+  return fmtDate(cursor);
+}
 function sameDay(a, b) {
   return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
 }
@@ -222,18 +236,21 @@ function renderSlots() {
     if (!slotDate) return;
 
     const slotDateTime = slotDate.getTime() + timeToMin(s.start_time) * 60000;
+    const effectiveEndTime = isRecurringSlot(s) && s.recurring_till
+      ? parseDMY(s.recurring_till)?.getTime() ?? slotDateTime
+      : slotDateTime;
 
-    if (slotDateTime >= nowTime) {
+    if (effectiveEndTime >= nowTime) {
       upcomingSlots.push(s);
     } else {
       pastSlots.push(s);
     }
   });
 
-  // Sort upcoming: earliest first
+  // Sort upcoming: earliest first (use next recurring date for recurring slots)
   upcomingSlots.sort((a, b) => {
-    const ad = parseDMY(a.date);
-    const bd = parseDMY(b.date);
+    const ad = parseDMY(nextRecurringDate(a));
+    const bd = parseDMY(nextRecurringDate(b));
     const at = (ad ? ad.getTime() : 0) + timeToMin(a.start_time) * 60000;
     const bt = (bd ? bd.getTime() : 0) + timeToMin(b.start_time) * 60000;
     return at - bt;
@@ -253,7 +270,7 @@ function renderSlots() {
     upcomingBody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="empty-icon">📅</div>אין תורים עתידיים</div></td></tr>';
   } else {
     upcomingBody.innerHTML = upcomingSlots.map(s => `<tr>
-      <td class="slot-date" data-label="תאריך">${s.date||'—'}${isRecurringSlot(s) ? ` <span title="חוזר עד ${s.recurring_till || '—'}">🔁</span>` : ''}</td>
+      <td class="slot-date" data-label="תאריך">${nextRecurringDate(s)||'—'}${isRecurringSlot(s) ? ` <span title="חוזר עד ${s.recurring_till || '—'}">🔁</span>` : ''}</td>
       <td class="slot-time" data-label="התחלה">${s.start_time||'—'}</td>
       <td class="slot-time" data-label="סיום">${s.end_time||'—'}</td>
       <td class="slot-tenant" data-label="מטפל">${tenantName(s.tenant_id)}</td>
@@ -856,6 +873,7 @@ function openSlotModal(editId, prefillDate, prefillTime) {
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="saveSlot(${editId||'null'})">${isEdit?'שמור':'הוסף'}</button>
       <button class="btn btn-ghost" onclick="closeModal()">ביטול</button>
+      ${isEdit ? `<button class="btn btn-danger" style="margin-inline-start:auto" onclick="closeModal();confirmDelete('slots',${editId})">מחק</button>` : ''}
     </div>
   `);
 }
