@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Dashboard</title>
+    <style>
+      :root {
+        --bg: #f6f8fc;
+        --surface: #ffffff;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: #dbe2ee;
+        --header: #e7edf8;
+        --accent: #0057b8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Heebo", "Assistant", "Rubik", sans-serif;
+        background: linear-gradient(180deg, #f0f4fb 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      .container {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      h1 {
+        margin: 0 0 16px;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      .table-wrap {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: auto;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+      }
+
+      table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: collapse;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        background: var(--header);
+        font-size: 15px;
+        font-weight: 700;
+        color: #1f2937;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 12px 10px;
+        text-align: right;
+        vertical-align: middle;
+      }
+
+      tbody tr:hover {
+        background: #f8fbff;
+      }
+
+      .col-num {
+        width: 80px;
+        text-align: center;
+        font-weight: 700;
+      }
+
+      .col-link {
+        direction: ltr;
+        text-align: left;
+      }
+
+      .url {
+        color: var(--accent);
+        text-decoration: none;
+        word-break: break-all;
+      }
+
+      .url:hover {
+        text-decoration: underline;
+      }
+
+      .thumb {
+        width: 84px;
+        height: 84px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #d7e0ef;
+        background: #f2f6ff;
+      }
+
+      .qr {
+        width: 84px;
+        height: 84px;
+        border-radius: 10px;
+        border: 1px solid #d7e0ef;
+        background: #fff;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 14px;
+        }
+
+        h1 {
+          font-size: 22px;
+        }
+
+        th,
+        td {
+          padding: 10px 8px;
+          font-size: 13px;
+        }
+
+        .thumb,
+        .qr {
+          width: 64px;
+          height: 64px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>דשבורד תמונות ו-QR</h1>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-num">מספר</th>
+              <th>שם התמונה</th>
+              <th>לינק</th>
+              <th>תמונה</th>
+              <th>QR</th>
+            </tr>
+          </thead>
+          <tbody id="dashboard-body"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
