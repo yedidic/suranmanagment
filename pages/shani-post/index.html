@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>איתור תיבת דואר</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 24px;
+      direction: rtl;
+    }
+
+    .app {
+      max-width: 720px;
+      margin: auto;
+      background: white;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 26px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .chat {
+      height: 420px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 16px;
+      background: #fafafa;
+      margin-bottom: 16px;
+    }
+
+    .message {
+      margin-bottom: 12px;
+      padding: 11px 15px;
+      border-radius: 16px;
+      max-width: 88%;
+      line-height: 1.5;
+      white-space: pre-line;
+      font-size: 16px;
+    }
+
+    .bot {
+      background: #eeeeee;
+      margin-left: auto;
+    }
+
+    .user {
+      background: #dceeff;
+      margin-right: auto;
+    }
+
+    .whatsapp-card {
+      background: #eef7ef;
+      border: 1px solid #cfe8d1;
+      margin-left: auto;
+    }
+
+    .whatsapp-card-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .whatsapp-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .preview-box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      white-space: pre-line;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 13px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      min-width: 0;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: 0;
+      border-radius: 12px;
+      background: #222;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: #444;
+    }
+
+    button:disabled {
+      background: #888;
+      cursor: not-allowed;
+    }
+
+    .mic-button {
+      font-size: 20px;
+      width: 54px;
+    }
+
+    .preview-button {
+      background: #555;
+    }
+
+    .preview-button:hover {
+      background: #666;
+    }
+
+    .whatsapp-button {
+      background: #1f7a38;
+    }
+
+    .whatsapp-button:hover {
+      background: #269447;
+    }
+
+    .hint {
+      color: #777;
+      font-size: 14px;
+      margin-top: 12px;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      .app {
+        padding: 16px;
+      }
+
+      .chat {
+        height: 360px;
+      }
+
+      .input-row {
+        flex-wrap: wrap;
+      }
+
+      input {
+        flex-basis: 100%;
+      }
+
+      .mic-button,
+      #sendButton {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <h1>איתור תיבת דואר</h1>
+
+    <div class="subtitle">
+      כתוב או אמור בקול שם משפחה, מספר תיבה או מספר טלפון.
+      <br>
+      לאחר מציאת האדם, אפשר להציג את נוסח ההודעה ולפתוח WhatsApp לשליחה.
+    </div>
+
+    <div class="chat" id="chat">
+      <div class="message bot">
+        שלום, אפשר לכתוב או ללחוץ על המיקרופון ולומר למשל:
+        מה התיבה של משפחת כהן?
+      </div>
+    </div>
+
+    <div class="input-row">
+      <input id="question" type="text" placeholder="לדוגמה: מה התיבה של משפחת כהן?">
+      <button id="micButton" class="mic-button" type="button">🎤</button>
+      <button id="sendButton" type="button">שלח</button>
+    </div>
+
+    <div class="hint">
+      זיהוי קולי עובד בעיקר ב־Chrome. בפעם הראשונה הדפדפן אמור לבקש הרשאת מיקרופון.
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
