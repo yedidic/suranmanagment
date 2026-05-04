@@ -6,12 +6,25 @@ const questionInput = document.getElementById("question");
 const sendButton = document.getElementById("sendButton");
 const micButton = document.getElementById("micButton");
 const stopMicButton = document.getElementById("stopMicButton");
+
 let recognition = null;
 let isListening = false;
+let liveMode = false;
+let isProcessing = false;
+let lastTranscript = "";
+let lastTranscriptAt = 0;
 
-sendButton.addEventListener("click", ask);
-micButton.addEventListener("click", startListening);
-stopMicButton.addEventListener("click", stopListening);
+sendButton.addEventListener("click", function () {
+  ask();
+});
+
+micButton.addEventListener("click", function () {
+  toggleLiveConversation();
+});
+
+stopMicButton.addEventListener("click", function () {
+  stopLiveConversation();
+});
 
 questionInput.addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
@@ -27,8 +40,8 @@ function addMessage(text, type) {
   chat.scrollTop = chat.scrollHeight;
 }
 
-function ask() {
-  const question = questionInput.value.trim();
+function ask(customQuestion) {
+  const question = String(customQuestion || questionInput.value || "").trim();
 
   if (!question) return;
 
@@ -36,7 +49,7 @@ function ask() {
 
   questionInput.value = "";
   sendButton.disabled = true;
-  micButton.disabled = true;
+  isProcessing = true;
 
   callAppsScriptSearch(question)
     .then(function (response) {
@@ -44,18 +57,26 @@ function ask() {
 
       renderWhatsappButtons(response.results || []);
 
-      speak(response.message || "");
+      speak(response.message || "", function () {
+        isProcessing = false;
+        sendButton.disabled = false;
+        questionInput.focus();
 
-      sendButton.disabled = false;
-      micButton.disabled = false;
-      questionInput.focus();
+        if (liveMode) {
+          restartLiveListening();
+        }
+      });
     })
     .catch(function (error) {
       addMessage("אירעה שגיאה: " + error.message, "bot");
 
+      isProcessing = false;
       sendButton.disabled = false;
-      micButton.disabled = false;
       questionInput.focus();
+
+      if (liveMode) {
+        restartLiveListening();
+      }
     });
 }
 
@@ -174,104 +195,226 @@ function renderWhatsappButtons(results) {
   });
 }
 
-function startListening() {
-  if (isListening) {
-    stopListening();
+/**
+ * כפתור המיקרופון מפעיל/מפסיק מצב שיחה חיה.
+ */
+function toggleLiveConversation() {
+  if (liveMode) {
+    stopLiveConversation();
     return;
   }
 
-  addMessage("נלחץ כפתור המיקרופון.", "bot");
+  startLiveConversation();
+}
 
+function startLiveConversation() {
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
     addMessage(
       "הדפדפן הזה לא תומך בזיהוי דיבור דרך JavaScript. נסה לפתוח את האתר ב־Google Chrome.",
-      "bot",
+      "bot"
     );
     return;
   }
+
+  liveMode = true;
+  isProcessing = false;
+  lastTranscript = "";
+  lastTranscriptAt = 0;
+
+  micButton.textContent = "🟢";
+  micButton.title = "שיחה חיה פעילה — לחץ להפסקה";
+
+  if (stopMicButton) {
+    stopMicButton.disabled = false;
+  }
+
+  addMessage("שיחה חיה הופעלה. אני מקשיב לך ברצף.", "bot");
+
+  startRecognitionSession();
+}
+
+function startRecognitionSession() {
+  if (!liveMode || isListening || isProcessing) return;
+
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
   try {
     recognition = new SpeechRecognition();
 
     recognition.lang = "he-IL";
-    recognition.interimResults = false;
-    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.continuous = true;
     recognition.maxAlternatives = 1;
 
     recognition.onstart = function () {
       isListening = true;
-      micButton.textContent = "⏹️";
-      micButton.title = "עצור הקלטה";
-      addMessage("אני מקשיב... לחץ שוב על הכפתור כדי לעצור.", "bot");
+      micButton.textContent = "🟢";
+      micButton.title = "שיחה חיה פעילה — לחץ להפסקה";
+    };
+
+    recognition.onspeechstart = function () {
+      // ברגע שאתה מתחיל לדבר — לעצור את הדוברת
+      stopSpeaking();
     };
 
     recognition.onresult = function (event) {
-      const transcript = event.results[0][0].transcript;
+      let finalTranscript = "";
 
-      addMessage("שמעתי: " + transcript, "bot");
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript.trim();
 
-      questionInput.value = transcript;
-      ask();
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + " ";
+        }
+      }
+
+      finalTranscript = finalTranscript.trim();
+
+      if (!finalTranscript) return;
+
+      const now = Date.now();
+
+      // מניעת שליחה כפולה של אותו משפט
+      if (
+        finalTranscript === lastTranscript &&
+        now - lastTranscriptAt < 2500
+      ) {
+        return;
+      }
+
+      lastTranscript = finalTranscript;
+      lastTranscriptAt = now;
+
+      stopRecognitionOnly();
+
+      ask(finalTranscript);
     };
 
     recognition.onerror = function (event) {
-      let message = "אירעה שגיאה בזיהוי הדיבור: " + event.error;
+      if (!liveMode) return;
+
+      let message = "";
 
       if (event.error === "not-allowed") {
         message = "הגישה למיקרופון חסומה. צריך לאשר הרשאת מיקרופון בדפדפן.";
-      }
-
-      if (event.error === "no-speech") {
-        message =
-          'לא שמעתי דיבור. נסה שוב ולדבר אחרי שמופיעה ההודעה "אני מקשיב".';
-      }
-
-      if (event.error === "audio-capture") {
+        liveMode = false;
+      } else if (event.error === "audio-capture") {
         message = "לא נמצא מיקרופון פעיל במכשיר.";
-      }
-
-      if (event.error === "network") {
+        liveMode = false;
+      } else if (event.error === "network") {
         message = "אירעה שגיאת רשת בזיהוי הדיבור. נסה שוב ב־Chrome.";
+      } else if (event.error === "no-speech") {
+        // במצב שיחה חיה זה יכול לקרות, לא חייבים להציג שגיאה בכל פעם
+        message = "";
+      } else if (event.error === "aborted") {
+        message = "";
+      } else {
+        message = "אירעה שגיאה בזיהוי הדיבור: " + event.error;
       }
 
-      addMessage(message, "bot");
+      if (message) {
+        addMessage(message, "bot");
+      }
     };
 
     recognition.onend = function () {
       isListening = false;
-      micButton.textContent = "🎤";
-      micButton.title = "התחל הקלטה";
+
+      if (liveMode && !isProcessing) {
+        setTimeout(function () {
+          startRecognitionSession();
+        }, 350);
+      }
     };
 
     recognition.start();
   } catch (error) {
     addMessage("לא הצלחתי להפעיל את המיקרופון: " + error.message, "bot");
-    isListening = false;
-    micButton.textContent = "🎤";
-    micButton.title = "התחל הקלטה";
+    stopLiveConversation();
   }
 }
 
-function stopListening() {
-  if (!recognition || !isListening) return;
+function restartLiveListening() {
+  if (!liveMode) return;
+
+  setTimeout(function () {
+    startRecognitionSession();
+  }, 500);
+}
+
+function stopRecognitionOnly() {
+  if (!recognition) return;
 
   try {
+    recognition.onend = null;
     recognition.stop();
-    addMessage("עצרתי את ההאזנה.", "bot");
   } catch (error) {
-    addMessage("לא הצלחתי לעצור את המיקרופון: " + error.message, "bot");
+    try {
+      recognition.abort();
+    } catch (abortError) {
+      // ignore
+    }
   } finally {
     isListening = false;
-    micButton.textContent = "🎤";
-    micButton.title = "התחל הקלטה";
+    recognition = null;
   }
 }
 
-function speak(text) {
-  if (!text || !window.speechSynthesis) return;
+function stopLiveConversation() {
+  liveMode = false;
+  isProcessing = false;
+
+  stopSpeaking();
+
+  if (recognition) {
+    try {
+      recognition.onend = null;
+      recognition.stop();
+    } catch (error) {
+      try {
+        recognition.abort();
+      } catch (abortError) {
+        // ignore
+      }
+    }
+  }
+
+  recognition = null;
+  isListening = false;
+
+  micButton.textContent = "🎤";
+  micButton.title = "התחל שיחה חיה";
+
+  if (stopMicButton) {
+    stopMicButton.disabled = true;
+  }
+
+  addMessage("שיחה חיה הופסקה.", "bot");
+}
+
+/**
+ * תאימות לאחור — אם יש לך כפתור/קוד שקורא startListening.
+ */
+function startListening() {
+  toggleLiveConversation();
+}
+
+/**
+ * תאימות לאחור — אם יש כפתור עצירה קיים.
+ */
+function stopListening() {
+  stopLiveConversation();
+}
+
+function speak(text, onDone) {
+  if (!text || !window.speechSynthesis) {
+    if (typeof onDone === "function") onDone();
+    return;
+  }
 
   try {
     window.speechSynthesis.cancel();
@@ -281,8 +424,26 @@ function speak(text) {
     utterance.rate = 1;
     utterance.pitch = 1;
 
+    utterance.onend = function () {
+      if (typeof onDone === "function") onDone();
+    };
+
+    utterance.onerror = function () {
+      if (typeof onDone === "function") onDone();
+    };
+
     window.speechSynthesis.speak(utterance);
   } catch (error) {
-    // הצ׳אט עובד גם בלי הקראה קולית.
+    if (typeof onDone === "function") onDone();
+  }
+}
+
+function stopSpeaking() {
+  if (!window.speechSynthesis) return;
+
+  try {
+    window.speechSynthesis.cancel();
+  } catch (error) {
+    // ignore
   }
 }
